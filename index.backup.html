@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow - ADHD Task Manager</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .level-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .level-progress {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-profile {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-profile:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .btn-calendar {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-calendar:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-goals {
+            background: #9f7aea;
+            color: white;
+        }
+
+        .btn-goals:hover {
+            background: #805ad5;
+            transform: translateY(-2px);
+        }
+
+        .tab-container {
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .tab-btn:hover {
+            background: #f7fafc;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-icon {
+            font-size: 1.3em;
+            margin-right: 8px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #999;
+            font-size: 0.85em;
+            font-weight: 500;
+            gap: 4px;
+        }
+
+        .nav-item:hover {
+            color: #667eea;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-item-icon {
+            font-size: 1.8em;
+            transition: transform 0.3s;
+        }
+
+        .nav-item.active .nav-item-icon {
+            transform: scale(1.15);
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 5px;
+            right: 20px;
+            background: #f56565;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            font-weight: 600;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .main-content {
+            padding-bottom: 100px;
+        }
+
+        .header {
+            justify-content: center;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .sync-status.connected {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .sync-status.disconnected {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .calendar-provider {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .calendar-provider:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .calendar-provider.connected {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .calendar-provider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-provider-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header h2 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .task {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid #ddd;
+        }
+
+        .task:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .task.priority-low { border-left-color: #48bb78; }
+        .task.priority-medium { border-left-color: #ed8936; }
+        .task.priority-high { border-left-color: #f56565; }
+        .task.priority-urgent { border-left-color: #9f7aea; }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .badge-category { background: #bee3f8; color: #2c5282; }
+        .badge-priority { background: #fed7d7; color: #742a2a; }
+        .badge-time { background: #fbd38d; color: #744210; }
+        .badge-due { background: #fbb6ce; color: #702459; }
+        .badge-horizon { background: #c6f6d5; color: #22543d; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 2000;
+            text-align: center;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .celebration h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .celebration-emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .floating-emoji {
+            position: fixed;
+            font-size: 2em;
+            pointer-events: none;
+            z-index: 1999;
+            animation: floatDown 3s ease-out forwards;
+        }
+
+        @keyframes floatDown {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(500px) rotate(360deg);
+            }
+        }
+
+        .profile-section {
+            text-align: center;
+        }
+
+        .avatar-selector {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .avatar-option {
+            font-size: 2em;
+            padding: 10px;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .avatar-option:hover {
+            background: #f7fafc;
+        }
+
+        .avatar-option.selected {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .achievements {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .achievement {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            opacity: 0.4;
+        }
+
+        .achievement.unlocked {
+            opacity: 1;
+            background: linear-gradient(135deg, #fef5e7, #fdebd0);
+            border: 2px solid #f39c12;
+        }
+
+        .achievement-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .achievement-desc {
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .avatar-selector {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const CATEGORIES = ['Work', 'Personal', 'Health', 'Learning', 'Finance', 'Social'];
+        const PRIORITIES = ['Low', 'Medium', 'High', 'Urgent'];
+        const TIME_HORIZONS = ['Short-term', 'Mid-term', 'Long-term'];
+        const AVATARS = ['🚀', '⭐', '🔥', '💎', '🎯', '🌟', '💪', '🎨', '🦄', '🌈', '⚡', '🎭', '🎪', '🎸', '🎮', '🏆'];
+
+        const ACHIEVEMENTS = [
+            { id: 'first', name: 'First Steps', desc: 'Complete 1 task', icon: '🎯', unlock: (stats) => stats.totalCompleted >= 1 },
+            { id: 'roll', name: 'On a Roll', desc: '3-day streak', icon: '🔥', unlock: (stats) => stats.currentStreak >= 3 },
+            { id: 'week', name: 'Week Warrior', desc: '7-day streak', icon: '⚡', unlock: (stats) => stats.currentStreak >= 7 },
+            { id: 'pro', name: 'Productivity Pro', desc: 'Complete 10 tasks', icon: '💪', unlock: (stats) => stats.totalCompleted >= 10 },
+            { id: 'master', name: 'Task Master', desc: 'Complete 50 tasks', icon: '👑', unlock: (stats) => stats.totalCompleted >= 50 },
+            { id: 'level5', name: 'Rising Star', desc: 'Reach Level 5', icon: '🌟', unlock: (stats) => stats.level >= 5 }
+        ];
+
+        const CELEBRATION_MESSAGES = [
+            "Well done! You're smashing it!",
+            "Amazing work! Keep crushing it!",
+            "You absolute legend! Well done!",
+            "Fantastic! You're on fire!",
+            "Incredible! Keep it up!",
+            "You're killing it! Great job!",
+            "Outstanding work! So proud!",
+            "Yes! Another one down!"
+        ];
+
+        const CELEBRATION_EMOJIS = ['🎉', '⭐', '✨', '🌟', '💫', '🎊', '🏆', '👏', '💪', '🔥', '🚀', '💯', '🎯', '⚡', '🌈'];
+
+        function App() {
+            const [tasks, setTasks] = useState([]);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [addingType, setAddingType] = useState('task'); // 'task' or 'goal'
+            const [activeTab, setActiveTab] = useState('tasks'); // 'tasks', 'goals', 'profile', 'calendar'
+            const [viewMode, setViewMode] = useState('category');
+            const [collapsedSections, setCollapsedSections] = useState({});
+            const [celebration, setCelebration] = useState(null);
+            const [floatingEmojis, setFloatingEmojis] = useState([]);
+
+            const [calendarSettings, setCalendarSettings] = useState({
+                googleConnected: false,
+                googleEmail: '',
+                appleCalendarEnabled: false,
+                autoSync: true
+            });
+
+            const [profile, setProfile] = useState({
+                username: 'Task Master',
+                avatar: '🚀',
+                level: 1,
+                xp: 0,
+                currentStreak: 0,
+                bestStreak: 0,
+                lastCompletedDate: null,
+                totalCompleted: 0
+            });
+
+            const [newTask, setNewTask] = useState({
+                title: '',
+                notes: '',
+                category: 'Personal',
+                priority: 'Medium',
+                timeHorizon: 'Short-term',
+                type: 'task', // 'task' or 'goal'
+                reminder: false,
+                dueDate: '',
+                dueTime: ''
+            });
+
+            // Load data from localStorage
+            useEffect(() => {
+                const savedTasks = localStorage.getItem('focusflow_tasks');
+                const savedProfile = localStorage.getItem('focusflow_profile');
+                const savedCalendar = localStorage.getItem('focusflow_calendar');
+
+                if (savedTasks) setTasks(JSON.parse(savedTasks));
+                if (savedProfile) setProfile(JSON.parse(savedProfile));
+                if (savedCalendar) setCalendarSettings(JSON.parse(savedCalendar));
+            }, []);
+
+            // Save data to localStorage
+            useEffect(() => {
+                localStorage.setItem('focusflow_tasks', JSON.stringify(tasks));
+            }, [tasks]);
+
+            useEffect(() => {
+                localStorage.setItem('focusflow_profile', JSON.stringify(profile));
+            }, [profile]);
+
+            useEffect(() => {
+                localStorage.setItem('focusflow_calendar', JSON.stringify(calendarSettings));
+            }, [calendarSettings]);
+
+            const openAddModal = (type) => {
+                setAddingType(type);
+                setNewTask({
+                    ...newTask,
+                    type: type,
+                    timeHorizon: type === 'goal' ? 'Long-term' : 'Short-term'
+                });
+                setShowAddModal(true);
+            };
+
+            const switchTab = (tab) => {
+                setActiveTab(tab);
+            };
+
+            const addTask = () => {
+                if (!newTask.title.trim()) return;
+
+                const task = {
+                    id: Date.now(),
+                    ...newTask,
+                    type: addingType,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                setTasks([...tasks, task]);
+                setNewTask({
+                    title: '',
+                    notes: '',
+                    category: 'Personal',
+                    priority: 'Medium',
+                    timeHorizon: 'Short-term',
+                    type: 'task',
+                    reminder: false,
+                    dueDate: '',
+                    dueTime: ''
+                });
+                setShowAddModal(false);
+
+                // If reminders enabled, try to sync to calendar
+                if (task.reminder && calendarSettings.autoSync) {
+                    syncTaskToCalendar(task);
+                }
+            };
+
+            const toggleTask = (taskId) => {
+                const task = tasks.find(t => t.id === taskId);
+                if (!task || task.completed) return;
+
+                setTasks(tasks.map(t =>
+                    t.id === taskId ? { ...t, completed: true, completedAt: new Date().toISOString() } : t
+                ));
+
+                // Calculate points based on priority
+                const points = {
+                    'Low': 10,
+                    'Medium': 25,
+                    'High': 50,
+                    'Urgent': 100
+                }[task.priority];
+
+                // Update profile stats
+                const today = new Date().toDateString();
+                const lastDate = profile.lastCompletedDate;
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+                let newStreak = profile.currentStreak;
+                if (lastDate === today) {
+                    // Same day, keep streak
+                    newStreak = profile.currentStreak;
+                } else if (lastDate === yesterday) {
+                    // Consecutive day
+                    newStreak = profile.currentStreak + 1;
+                } else {
+                    // Streak broken
+                    newStreak = 1;
+                }
+
+                const newXP = profile.xp + points;
+                const newLevel = Math.floor(newXP / 100) + 1;
+
+                setProfile({
+                    ...profile,
+                    xp: newXP,
+                    level: newLevel,
+                    currentStreak: newStreak,
+                    bestStreak: Math.max(newStreak, profile.bestStreak),
+                    lastCompletedDate: today,
+                    totalCompleted: profile.totalCompleted + 1
+                });
+
+                // Show celebration
+                showCelebration(points);
+            };
+
+            const showCelebration = (points) => {
+                const message = CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+
+                setCelebration({
+                    message,
+                    points
+                });
+
+                // Create floating emojis
+                const newEmojis = [];
+                for (let i = 0; i < 15; i++) {
+                    newEmojis.push({
+                        id: Date.now() + i,
+                        emoji: CELEBRATION_EMOJIS[Math.floor(Math.random() * CELEBRATION_EMOJIS.length)],
+                        left: Math.random() * 100,
+                        delay: Math.random() * 0.5
+                    });
+                }
+                setFloatingEmojis(newEmojis);
+
+                // Clear celebration after 3 seconds
+                setTimeout(() => {
+                    setCelebration(null);
+                    setFloatingEmojis([]);
+                }, 3000);
+            };
+
+            const deleteTask = (taskId) => {
+                setTasks(tasks.filter(t => t.id !== taskId));
+            };
+
+            // Calendar integration functions
+            const connectGoogleCalendar = () => {
+                // In production, this would use Google OAuth
+                // For demo, we'll simulate connection
+                const email = prompt('Enter your Google email (demo mode):');
+                if (email) {
+                    setCalendarSettings({
+                        ...calendarSettings,
+                        googleConnected: true,
+                        googleEmail: email
+                    });
+                    alert('✅ Google Calendar connected! (Demo mode - in production this would use OAuth)');
+                }
+            };
+
+            const disconnectGoogleCalendar = () => {
+                setCalendarSettings({
+                    ...calendarSettings,
+                    googleConnected: false,
+                    googleEmail: ''
+                });
+            };
+
+            const exportToAppleCalendar = () => {
+                // Export tasks as .ics file for Apple Calendar
+                const activeTasks = tasks.filter(t => !t.completed && t.reminder);
+
+                if (activeTasks.length === 0) {
+                    alert('No tasks with reminders to export!');
+                    return;
+                }
+
+                let icsContent = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//FocusFlow//ADHD Task Manager//EN\nCALSCALE:GREGORIAN\n';
+
+                activeTasks.forEach(task => {
+                    const now = new Date();
+                    const dueDateTime = task.dueDate && task.dueTime
+                        ? new Date(`${task.dueDate}T${task.dueTime}`)
+                        : new Date(now.getTime() + 3600000); // 1 hour from now
+
+                    const formatDate = (date) => {
+                        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                    };
+
+                    icsContent += 'BEGIN:VEVENT\n';
+                    icsContent += `UID:${task.id}@focusflow\n`;
+                    icsContent += `DTSTAMP:${formatDate(now)}\n`;
+                    icsContent += `DTSTART:${formatDate(dueDateTime)}\n`;
+                    icsContent += `SUMMARY:${task.title}\n`;
+                    icsContent += `DESCRIPTION:${task.notes || ''} [${task.category} - ${task.priority} Priority]\n`;
+                    icsContent += 'BEGIN:VALARM\n';
+                    icsContent += 'TRIGGER:-PT15M\n';
+                    icsContent += 'ACTION:DISPLAY\n';
+                    icsContent += `DESCRIPTION:Reminder: ${task.title}\n`;
+                    icsContent += 'END:VALARM\n';
+                    icsContent += 'END:VEVENT\n';
+                });
+
+                icsContent += 'END:VCALENDAR';
+
+                // Create download
+                const blob = new Blob([icsContent], { type: 'text/calendar' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'FocusFlow-Tasks.ics';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                alert('📅 Calendar file downloaded! Open it to add tasks to Apple Calendar or any calendar app.');
+            };
+
+            const syncTaskToCalendar = (task) => {
+                // This would sync a single task to the connected calendar
+                if (calendarSettings.googleConnected) {
+                    console.log('Syncing task to Google Calendar:', task);
+                    // In production: Google Calendar API call here
+                }
+            };
+
+            const syncAllTasks = () => {
+                const tasksWithReminders = tasks.filter(t => !t.completed && t.reminder);
+
+                if (calendarSettings.googleConnected) {
+                    alert(`✅ Syncing ${tasksWithReminders.length} tasks to Google Calendar... (Demo mode)`);
+                } else if (calendarSettings.appleCalendarEnabled) {
+                    exportToAppleCalendar();
+                } else {
+                    alert('Please connect a calendar first!');
+                }
+            };
+
+            const toggleSection = (section) => {
+                setCollapsedSections({
+                    ...collapsedSections,
+                    [section]: !collapsedSections[section]
+                });
+            };
+
+            const getTasksByView = () => {
+                // Only filter if we're on tasks or goals tab
+                if (activeTab !== 'tasks' && activeTab !== 'goals') return [];
+
+                // Filter by active tab (tasks or goals)
+                const activeTasks = tasks.filter(t => !t.completed && (t.type || 'task') === activeTab.slice(0, -1)); // 'tasks' -> 'task'
+
+                if (viewMode === 'category') {
+                    return CATEGORIES.map(cat => ({
+                        name: cat,
+                        icon: getCategoryIcon(cat),
+                        tasks: activeTasks.filter(t => t.category === cat)
+                    })).filter(section => section.tasks.length > 0);
+                } else if (viewMode === 'time') {
+                    return [
+                        { name: 'Today', icon: '📅', tasks: activeTasks },
+                        { name: 'This Week', icon: '📆', tasks: [] },
+                        { name: 'This Month', icon: '🗓️', tasks: [] },
+                        { name: 'Later', icon: '⏰', tasks: [] }
+                    ].filter(section => section.tasks.length > 0);
+                } else if (viewMode === 'priority') {
+                    return PRIORITIES.map(pri => ({
+                        name: pri,
+                        icon: getPriorityIcon(pri),
+                        tasks: activeTasks.filter(t => t.priority === pri)
+                    })).filter(section => section.tasks.length > 0);
+                } else { // goals (time horizon)
+                    return TIME_HORIZONS.map(horizon => ({
+                        name: horizon,
+                        icon: getTimeHorizonIcon(horizon),
+                        tasks: activeTasks.filter(t => (t.timeHorizon || 'Short-term') === horizon)
+                    })).filter(section => section.tasks.length > 0);
+                }
+            };
+
+            const getCategoryIcon = (category) => {
+                const icons = {
+                    'Work': '💼',
+                    'Personal': '🏠',
+                    'Health': '💪',
+                    'Learning': '📚',
+                    'Finance': '💰',
+                    'Social': '👥'
+                };
+                return icons[category] || '📝';
+            };
+
+            const getPriorityIcon = (priority) => {
+                const icons = {
+                    'Low': '🟢',
+                    'Medium': '🟡',
+                    'High': '🔴',
+                    'Urgent': '🟣'
+                };
+                return icons[priority] || '⚪';
+            };
+
+            const getTimeHorizonIcon = (horizon) => {
+                const icons = {
+                    'Short-term': '⚡',
+                    'Mid-term': '🎯',
+                    'Long-term': '🌟'
+                };
+                return icons[horizon] || '⚡';
+            };
+
+            const getCompletedTasksByDay = () => {
+                if (activeTab !== 'tasks' && activeTab !== 'goals') return [];
+                const completedTasks = tasks.filter(t => t.completed && (t.type || 'task') === activeTab.slice(0, -1));
+                const today = new Date().toDateString();
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                const weekAgo = Date.now() - (7 * 86400000);
+
+                const groups = {
+                    today: [],
+                    yesterday: [],
+                    thisWeek: [],
+                    older: []
+                };
+
+                completedTasks.forEach(task => {
+                    const completedDate = task.completedAt ? new Date(task.completedAt).toDateString() : today;
+                    const completedTime = task.completedAt ? new Date(task.completedAt).getTime() : Date.now();
+
+                    if (completedDate === today) {
+                        groups.today.push(task);
+                    } else if (completedDate === yesterday) {
+                        groups.yesterday.push(task);
+                    } else if (completedTime > weekAgo) {
+                        groups.thisWeek.push(task);
+                    } else {
+                        groups.older.push(task);
+                    }
+                });
+
+                const result = [];
+                if (groups.today.length > 0) {
+                    result.push({ name: 'Today', icon: '✅', tasks: groups.today });
+                }
+                if (groups.yesterday.length > 0) {
+                    result.push({ name: 'Yesterday', icon: '📆', tasks: groups.yesterday });
+                }
+                if (groups.thisWeek.length > 0) {
+                    result.push({ name: 'This Week', icon: '📅', tasks: groups.thisWeek });
+                }
+                if (groups.older.length > 0) {
+                    result.push({ name: 'Older', icon: '🗓️', tasks: groups.older });
+                }
+
+                return result;
+            };
+
+            const xpToNextLevel = (profile.level * 100) - profile.xp;
+            const xpProgress = ((profile.xp % 100) / 100) * 100;
+            const activeTasks = tasks.filter(t => !t.completed && (t.type || 'task') === 'task').length;
+            const activeGoals = tasks.filter(t => !t.completed && (t.type || 'task') === 'goal').length;
+            const totalTasks = tasks.length;
+
+            const unlockedAchievements = ACHIEVEMENTS.filter(a => a.unlock(profile));
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>🎯 FocusFlow</h1>
+                    </div>
+
+                    <div className="main-content">
+
+                    {/* Stats - Show on Tasks and Goals tabs */}
+                    {(activeTab === 'tasks' || activeTab === 'goals') && (
+                        <div className="stats">
+                            <div className="stat-card">
+                                <h3>Level {profile.level}</h3>
+                                <p>{xpToNextLevel} XP to next level</p>
+                                <div className="level-bar">
+                                    <div className="level-progress" style={{ width: `${xpProgress}%` }}></div>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <h3>{profile.currentStreak} 🔥</h3>
+                                <p>Current Streak</p>
+                            </div>
+                            <div className="stat-card">
+                                <h3>{activeTasks}</h3>
+                                <p>Active Tasks</p>
+                            </div>
+                            <div className="stat-card">
+                                <h3>{activeGoals}</h3>
+                                <p>Active Goals</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tasks/Goals Content */}
+                    {(activeTab === 'tasks' || activeTab === 'goals') && (
+                        <>
+                            <div className="controls">
+                                <strong>View by:</strong>
+                                <div className="view-toggle">
+                                    <button
+                                        className={`view-btn ${viewMode === 'category' ? 'active' : ''}`}
+                                        onClick={() => setViewMode('category')}
+                                    >
+                                        📂 Category
+                                    </button>
+                                    <button
+                                        className={`view-btn ${viewMode === 'goals' ? 'active' : ''}`}
+                                        onClick={() => setViewMode('goals')}
+                                    >
+                                        🌟 Time Horizon
+                                    </button>
+                                    <button
+                                        className={`view-btn ${viewMode === 'priority' ? 'active' : ''}`}
+                                        onClick={() => setViewMode('priority')}
+                                    >
+                                        🔥 Priority
+                                    </button>
+                                    <button
+                                        className={`view-btn ${viewMode === 'time' ? 'active' : ''}`}
+                                        onClick={() => setViewMode('time')}
+                                    >
+                                        ⏰ Time
+                                    </button>
+                                </div>
+                                <button
+                                    className={activeTab === 'tasks' ? 'btn btn-primary' : 'btn btn-goals'}
+                                    onClick={() => openAddModal(activeTab === 'tasks' ? 'task' : 'goal')}
+                                    style={{ marginLeft: 'auto' }}
+                                >
+                                    + Add {activeTab === 'tasks' ? 'Task' : 'Goal'}
+                                </button>
+                            </div>
+
+                            <div className="tasks-container">
+                        {getTasksByView().map(section => (
+                            <div key={section.name} className="section">
+                                <div className="section-header" onClick={() => toggleSection(section.name)}>
+                                    <h2>
+                                        {collapsedSections[section.name] ? '▶' : '▼'} {section.icon} {section.name}
+                                    </h2>
+                                    <span className="task-count">{section.tasks.length}</span>
+                                </div>
+                                {!collapsedSections[section.name] && (
+                                    <div>
+                                        {section.tasks.map(task => (
+                                            <div key={task.id} className={`task priority-${task.priority.toLowerCase()}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="task-checkbox"
+                                                    checked={task.completed}
+                                                    onChange={() => toggleTask(task.id)}
+                                                />
+                                                <div className="task-content">
+                                                    <div className="task-title">{task.title}</div>
+                                                    {task.notes && <div style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>{task.notes}</div>}
+                                                    <div className="task-meta">
+                                                        <span className="badge badge-horizon">{getTimeHorizonIcon(task.timeHorizon || 'Short-term')} {task.timeHorizon || 'Short-term'}</span>
+                                                        <span className="badge badge-category">{getCategoryIcon(task.category)} {task.category}</span>
+                                                        <span className="badge badge-priority">{getPriorityIcon(task.priority)} {task.priority}</span>
+                                                        {task.reminder && <span className="badge badge-time">🔔 Reminder</span>}
+                                                        {task.dueDate && <span className="badge badge-due">📅 {task.dueDate}</span>}
+                                                        {task.dueTime && <span className="badge badge-due">🕐 {task.dueTime}</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        {getTasksByView().length === 0 && (
+                            <div className="section">
+                                <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                                    <div style={{ fontSize: '4em', marginBottom: '20px' }}>
+                                        {activeTab === 'tasks' ? '✅' : '🎯'}
+                                    </div>
+                                    <h2>
+                                        {activeTab === 'tasks' ? 'No active tasks!' : 'No goals yet!'}
+                                    </h2>
+                                    <p>
+                                        {activeTab === 'tasks'
+                                            ? 'All caught up! Click "+ Add Task" to create a new task.'
+                                            : 'Time to dream big! Click "+ Add Goal" to set your first goal.'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                            {/* Completed Tasks/Goals Section */}
+                            {tasks.filter(t => t.completed && (t.type || 'task') === activeTab.slice(0, -1)).length > 0 && (
+                                <div style={{ marginTop: '30px' }}>
+                                    <div className="section">
+                                        <div className="section-header" onClick={() => toggleSection('completed-header')}>
+                                            <h2>
+                                                {collapsedSections['completed-header'] ? '▶' : '▼'} ✨ Completed {activeTab === 'tasks' ? 'Tasks' : 'Goals'} ({tasks.filter(t => t.completed && (t.type || 'task') === activeTab.slice(0, -1)).length})
+                                            </h2>
+                                        </div>
+
+                                {!collapsedSections['completed-header'] && (
+                                    <div>
+                                        {getCompletedTasksByDay().map(section => (
+                                            <div key={section.name} style={{ marginBottom: '20px' }}>
+                                                <div
+                                                    className="section-header"
+                                                    onClick={() => toggleSection(`completed-${section.name}`)}
+                                                    style={{ marginBottom: '10px' }}
+                                                >
+                                                    <h3 style={{ color: '#667eea', fontSize: '1.1em' }}>
+                                                        {collapsedSections[`completed-${section.name}`] ? '▶' : '▼'} {section.icon} {section.name}
+                                                    </h3>
+                                                    <span className="task-count">{section.tasks.length}</span>
+                                                </div>
+
+                                                {!collapsedSections[`completed-${section.name}`] && (
+                                                    <div>
+                                                        {section.tasks.map(task => (
+                                                            <div
+                                                                key={task.id}
+                                                                className={`task priority-${task.priority.toLowerCase()}`}
+                                                                style={{ opacity: 0.7 }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="task-checkbox"
+                                                                    checked={task.completed}
+                                                                    readOnly
+                                                                />
+                                                                <div className="task-content">
+                                                                    <div className="task-title" style={{ textDecoration: 'line-through' }}>
+                                                                        {task.title}
+                                                                    </div>
+                                                                    {task.notes && (
+                                                                        <div style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>
+                                                                            {task.notes}
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="task-meta">
+                                                                        <span className="badge badge-horizon">
+                                                                            {getTimeHorizonIcon(task.timeHorizon || 'Short-term')} {task.timeHorizon || 'Short-term'}
+                                                                        </span>
+                                                                        <span className="badge badge-category">
+                                                                            {getCategoryIcon(task.category)} {task.category}
+                                                                        </span>
+                                                                        <span className="badge badge-priority">
+                                                                            {getPriorityIcon(task.priority)} {task.priority}
+                                                                        </span>
+                                                                        {task.completedAt && (
+                                                                            <span className="badge" style={{ background: '#d6bcfa', color: '#44337a' }}>
+                                                                                ✓ {new Date(task.completedAt).toLocaleTimeString([], {
+                                                                                    hour: '2-digit',
+                                                                                    minute: '2-digit'
+                                                                                })}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+                        </div>
+                    </>
+                    )}
+
+                    {/* Calendar Content */}
+                    {activeTab === 'calendar' && (
+                        <div className="section">
+                            <div style={{ padding: '20px' }}>
+                                <h2 style={{ marginBottom: '20px', color: '#667eea' }}>📅 Calendar Integration</h2>
+
+                                <div style={{ marginBottom: '20px' }}>
+                                    <p style={{ color: '#666', marginBottom: '15px' }}>
+                                        Connect your calendar to sync tasks with reminders automatically!
+                                    </p>
+
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={calendarSettings.autoSync}
+                                                onChange={(e) => setCalendarSettings({
+                                                    ...calendarSettings,
+                                                    autoSync: e.target.checked
+                                                })}
+                                            />
+                                            <span>Auto-sync tasks with reminders</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Google Calendar */}
+                                <div
+                                    className={`calendar-provider ${calendarSettings.googleConnected ? 'connected' : ''}`}
+                                >
+                                    <div className="calendar-provider-header">
+                                        <div className="calendar-provider-title">
+                                            <span style={{ fontSize: '2em' }}>📧</span>
+                                            <span>Google Calendar</span>
+                                        </div>
+                                        {calendarSettings.googleConnected && (
+                                            <span className="sync-status connected">● Connected</span>
+                                        )}
+                                    </div>
+                                    {calendarSettings.googleConnected ? (
+                                        <div>
+                                            <p style={{ color: '#666', marginBottom: '10px' }}>
+                                                Connected as: <strong>{calendarSettings.googleEmail}</strong>
+                                            </p>
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={disconnectGoogleCalendar}
+                                                style={{ marginRight: '10px' }}
+                                            >
+                                                Disconnect
+                                            </button>
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={syncAllTasks}
+                                            >
+                                                Sync Now
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p style={{ color: '#666', marginBottom: '10px', fontSize: '0.9em' }}>
+                                                Sync your tasks to Google Calendar events with automatic reminders.
+                                            </p>
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={connectGoogleCalendar}
+                                            >
+                                                Connect Google Calendar
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Apple Calendar */}
+                                <div className="calendar-provider">
+                                    <div className="calendar-provider-header">
+                                        <div className="calendar-provider-title">
+                                            <span style={{ fontSize: '2em' }}>🍎</span>
+                                            <span>Apple Calendar / iCal</span>
+                                        </div>
+                                    </div>
+                                    <p style={{ color: '#666', marginBottom: '10px', fontSize: '0.9em' }}>
+                                        Export tasks as .ics file to import into Apple Calendar, Outlook, or any calendar app.
+                                    </p>
+                                    <button
+                                        className="btn btn-calendar"
+                                        onClick={exportToAppleCalendar}
+                                    >
+                                        📥 Export to Calendar (.ics)
+                                    </button>
+                                </div>
+
+                                <div style={{
+                                    marginTop: '20px',
+                                    padding: '15px',
+                                    background: '#f7fafc',
+                                    borderRadius: '10px',
+                                    fontSize: '0.9em'
+                                }}>
+                                    <strong>💡 How it works:</strong>
+                                    <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
+                                        <li>Tasks with reminders enabled will sync to your calendar</li>
+                                        <li>Set due date & time for accurate calendar events</li>
+                                        <li>Google Calendar syncs automatically (when connected)</li>
+                                        <li>Apple Calendar requires manual export/import</li>
+                                    </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    </div>
+
+                    {/* Bottom Navigation */}
+                    <div className="bottom-nav">
+                        <button
+                            className={`nav-item ${activeTab === 'tasks' ? 'active' : ''}`}
+                            onClick={() => switchTab('tasks')}
+                        >
+                            <div style={{ position: 'relative' }}>
+                                <div className="nav-item-icon">✅</div>
+                                {activeTasks > 0 && <div className="nav-badge">{activeTasks}</div>}
+                            </div>
+                            <span>My Tasks</span>
+                        </button>
+                        <button
+                            className={`nav-item ${activeTab === 'goals' ? 'active' : ''}`}
+                            onClick={() => switchTab('goals')}
+                        >
+                            <div style={{ position: 'relative' }}>
+                                <div className="nav-item-icon">🎯</div>
+                                {activeGoals > 0 && <div className="nav-badge">{activeGoals}</div>}
+                            </div>
+                            <span>My Goals</span>
+                        </button>
+                        <button
+                            className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+                            onClick={() => switchTab('profile')}
+                        >
+                            <div className="nav-item-icon">{profile.avatar}</div>
+                            <span>Profile</span>
+                        </button>
+                        <button
+                            className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
+                            onClick={() => switchTab('calendar')}
+                        >
+                            <div style={{ position: 'relative' }}>
+                                <div className="nav-item-icon">📅</div>
+                                {(calendarSettings.googleConnected || calendarSettings.appleCalendarEnabled) &&
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '0',
+                                        right: '-5px',
+                                        width: '10px',
+                                        height: '10px',
+                                        background: '#48bb78',
+                                        borderRadius: '50%',
+                                        border: '2px solid white'
+                                    }}></div>
+                                }
+                            </div>
+                            <span>Calendar</span>
+                        </button>
+                    </div>
+
+                    {/* Profile Content */}
+                    {activeTab === 'profile' && (
+                        <div className="section">
+                            <div style={{ padding: '20px' }}>
+                            <div className="profile-section">
+                                <h2 style={{ marginBottom: '20px', color: '#667eea' }}>👤 My Profile</h2>
+                                <div style={{ fontSize: '5em', marginBottom: '10px' }}>{profile.avatar}</div>
+                                <input
+                                    type="text"
+                                    value={profile.username}
+                                    onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                                    style={{
+                                        fontSize: '1.5em',
+                                        textAlign: 'center',
+                                        border: 'none',
+                                        borderBottom: '2px solid #667eea',
+                                        marginBottom: '10px',
+                                        fontWeight: 'bold',
+                                        width: '100%'
+                                    }}
+                                />
+                                <p style={{ color: '#666', marginBottom: '20px' }}>Level {profile.level} • {profile.xp} XP</p>
+
+                                <h3 style={{ marginTop: '30px', marginBottom: '10px' }}>Choose Avatar</h3>
+                                <div className="avatar-selector">
+                                    {AVATARS.map(avatar => (
+                                        <div
+                                            key={avatar}
+                                            className={`avatar-option ${profile.avatar === avatar ? 'selected' : ''}`}
+                                            onClick={() => setProfile({ ...profile, avatar })}
+                                        >
+                                            {avatar}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>Statistics</h3>
+                                <div style={{ textAlign: 'left', background: '#f7fafc', padding: '20px', borderRadius: '12px' }}>
+                                    <p><strong>Total Completed:</strong> {profile.totalCompleted} tasks</p>
+                                    <p><strong>Active Tasks:</strong> {activeTasks}</p>
+                                    <p><strong>Active Goals:</strong> {activeGoals}</p>
+                                    <p><strong>Best Streak:</strong> {profile.bestStreak} days</p>
+                                    <p><strong>Total Items:</strong> {totalTasks}</p>
+                                </div>
+
+                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>
+                                    Achievements ({unlockedAchievements.length}/{ACHIEVEMENTS.length})
+                                </h3>
+                                <div className="achievements">
+                                    {ACHIEVEMENTS.map(achievement => {
+                                        const unlocked = achievement.unlock(profile);
+                                        return (
+                                            <div key={achievement.id} className={`achievement ${unlocked ? 'unlocked' : ''}`}>
+                                                <div className="achievement-icon">{achievement.icon}</div>
+                                                <div className="achievement-name">{achievement.name}</div>
+                                                <div className="achievement-desc">{achievement.desc}</div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    )}
+
+                    {/* Add Task Modal */}
+                    {showAddModal && (
+                        <div className="modal" onClick={() => setShowAddModal(false)}>
+                            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>{addingType === 'task' ? '✅ Add New Task' : '🎯 Add New Goal'}</h2>
+                                    <button className="close-btn" onClick={() => setShowAddModal(false)}>×</button>
+                                </div>
+                                <div className="form-group">
+                                    <label>{addingType === 'task' ? 'Task' : 'Goal'} Title *</label>
+                                    <input
+                                        type="text"
+                                        value={newTask.title}
+                                        onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                                        placeholder={addingType === 'task' ? 'What do you need to do?' : 'What do you want to achieve?'}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Notes</label>
+                                    <textarea
+                                        value={newTask.notes}
+                                        onChange={(e) => setNewTask({ ...newTask, notes: e.target.value })}
+                                        placeholder="Add any additional details..."
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Time Horizon</label>
+                                    <select
+                                        value={newTask.timeHorizon}
+                                        onChange={(e) => setNewTask({ ...newTask, timeHorizon: e.target.value })}
+                                    >
+                                        {TIME_HORIZONS.map(horizon => (
+                                            <option key={horizon} value={horizon}>{getTimeHorizonIcon(horizon)} {horizon}</option>
+                                        ))}
+                                    </select>
+                                    <p style={{ fontSize: '0.85em', color: '#666', marginTop: '5px' }}>
+                                        {newTask.timeHorizon === 'Short-term' && (addingType === 'task' ? '⚡ Days to weeks (immediate tasks)' : '⚡ Complete within days to weeks')}
+                                        {newTask.timeHorizon === 'Mid-term' && (addingType === 'task' ? '🎯 Weeks to months (ongoing projects)' : '🎯 Achieve within weeks to months')}
+                                        {newTask.timeHorizon === 'Long-term' && (addingType === 'task' ? '🌟 Months to years (big plans)' : '🌟 Long-term vision (months to years)')}
+                                    </p>
+                                </div>
+                                <div className="form-group">
+                                    <label>Category</label>
+                                    <select
+                                        value={newTask.category}
+                                        onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
+                                    >
+                                        {CATEGORIES.map(cat => (
+                                            <option key={cat} value={cat}>{getCategoryIcon(cat)} {cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Priority</label>
+                                    <select
+                                        value={newTask.priority}
+                                        onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                                    >
+                                        {PRIORITIES.map(pri => (
+                                            <option key={pri} value={pri}>{getPriorityIcon(pri)} {pri}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Due Date & Time</label>
+                                    <div className="date-time-grid">
+                                        <input
+                                            type="date"
+                                            value={newTask.dueDate}
+                                            onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                        />
+                                        <input
+                                            type="time"
+                                            value={newTask.dueTime}
+                                            onChange={(e) => setNewTask({ ...newTask, dueTime: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={newTask.reminder}
+                                            onChange={(e) => setNewTask({ ...newTask, reminder: e.target.checked })}
+                                            style={{ width: 'auto', marginRight: '10px' }}
+                                        />
+                                        Set reminder (sync to calendar)
+                                    </label>
+                                    {newTask.reminder && (
+                                        <p style={{ fontSize: '0.85em', color: '#667eea', marginTop: '5px', marginLeft: '28px' }}>
+                                            {calendarSettings.googleConnected
+                                                ? '✓ Will sync to Google Calendar'
+                                                : calendarSettings.appleCalendarEnabled
+                                                ? '✓ Will be included in calendar export'
+                                                : '⚠️ Connect a calendar in Calendar Settings'}
+                                        </p>
+                                    )}
+                                </div>
+                                <button
+                                    className={addingType === 'task' ? 'btn btn-primary' : 'btn btn-goals'}
+                                    onClick={addTask}
+                                    style={{ width: '100%' }}
+                                >
+                                    {addingType === 'task' ? '✅ Add Task' : '🎯 Add Goal'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Celebration */}
+                    {celebration && (
+                        <div className="celebration">
+                            <div className="celebration-emoji">🎉</div>
+                            <h2>{celebration.message}</h2>
+                            <p style={{ fontSize: '1.2em', color: '#667eea', fontWeight: 'bold', marginTop: '10px' }}>
+                                +{celebration.points} XP
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Floating Emojis */}
+                    {floatingEmojis.map(item => (
+                        <div
+                            key={item.id}
+                            className="floating-emoji"
+                            style={{
+                                left: `${item.left}%`,
+                                top: '20%',
+                                animationDelay: `${item.delay}s`
+                            }}
+                        >
+                            {item.emoji}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
