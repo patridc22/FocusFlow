@@ -2510,7 +2510,7 @@
                             }
                         `}</style>
                         <div className="auth-container">
-                            <h1>🎯 .complete</h1>
+                            <h1>.complete</h1>
                             <p>{authMode === 'signup' ? 'Create your account to sync across devices' : 'Welcome back! Log in to access your tasks'}</p>
 
                             {authError && <div className="auth-error">{authError}</div>}
@@ -2687,7 +2687,10 @@
                         }
                     `}</style>
                     <div className="header">
-                        <h1>Hey {profile.username}, how's your day so far?</h1>
+                        {activeTab === 'tasks' && <h1>Hey {profile.username}</h1>}
+                        {activeTab === 'goals' && <h1>Your Goals</h1>}
+                        {activeTab === 'profile' && <h1>{profile.username}</h1>}
+                        {activeTab === 'calendar' && <h1>Calendar</h1>}
                     </div>
 
                     <div className="main-content">
@@ -2703,7 +2706,7 @@
                                 </div>
                             </div>
                             <div className="stat-card">
-                                <h3>{profile.currentStreak} 🔥</h3>
+                                <h3>{profile.currentStreak}</h3>
                                 <p>Current Streak</p>
                             </div>
                             <div className="stat-card">
@@ -2723,7 +2726,6 @@
                             {/* AI Insights */}
                             <div className="insights-card">
                                 <div className="insights-header">
-                                    <span>🤖</span>
                                     <span>AI Insights</span>
                                 </div>
                                 <div className="insights-grid">
@@ -2783,7 +2785,7 @@
                                         className={`view-btn ${viewMode === 'priority' ? 'active' : ''}`}
                                         onClick={() => setViewMode('priority')}
                                     >
-                                        🔥 Priority
+                                        Priority
                                     </button>
                                     <button
                                         className={`view-btn ${viewMode === 'time' ? 'active' : ''}`}
@@ -2863,7 +2865,7 @@
                                 <div className="section">
                                     <div className="section-header" onClick={() => toggleSection('completed-header')}>
                                         <h2>
-                                            {collapsedSections['completed-header'] ? '▶' : '▼'} ✨ Completed {activeTab === 'tasks' ? 'Tasks' : 'Goals'} ({tasks.filter(t => t.completed && (t.type || 'task') === activeTab.slice(0, -1)).length})
+                                            {collapsedSections['completed-header'] ? '▶' : '▼'} Completed {activeTab === 'tasks' ? 'Tasks' : 'Goals'} ({tasks.filter(t => t.completed && (t.type || 'task') === activeTab.slice(0, -1)).length})
                                         </h2>
                                     </div>
 
