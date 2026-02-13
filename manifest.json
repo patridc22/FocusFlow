@@ -2,10 +2,11 @@
   "name": ".complete - Focus & Task Management",
   "short_name": ".complete",
   "description": "Focus & Task Management - Your personal organization station with AI insights and beautiful themes",
-  "start_url": "/index.html",
+  "start_url": "/index.html?v=3",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#667eea",
+  "theme_color": "#1a1a1a",
   "orientation": "portrait",
   "icons": [
     {
