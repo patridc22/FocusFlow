@@ -15,22 +15,22 @@ def create_minimal_icon(size, filename):
         b = int(234 + (162 - 234) * ratio)
         draw.rectangle([(0, y), (size, y+1)], fill=(r, g, b))
 
-    # Draw simple "F" letter in center
+    # Draw simple ".c" letter in center
     try:
         # Use system font
-        font_size = int(size * 0.55)
+        font_size = int(size * 0.45)
         font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", font_size)
     except:
         try:
-            font = ImageFont.truetype("/System/Library/Fonts/SFNSDisplay.ttf", int(size * 0.55))
+            font = ImageFont.truetype("/System/Library/Fonts/SFNSDisplay.ttf", int(size * 0.45))
         except:
             try:
-                font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(size * 0.55))
+                font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(size * 0.45))
             except:
                 font = ImageFont.load_default()
 
-    # Draw single "F" in white
-    text = "F"
+    # Draw ".c" in white
+    text = ".c"
 
     # Get text bounding box
     bbox = draw.textbbox((0, 0), text, font=font)
