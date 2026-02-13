@@ -2040,6 +2040,16 @@
                 });
             };
 
+            // Sort tasks by priority (Urgent -> High -> Medium -> Low)
+            const sortByPriority = (tasks) => {
+                const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+                return tasks.sort((a, b) => {
+                    const aPriority = priorityOrder[a.priority] ?? 4;
+                    const bPriority = priorityOrder[b.priority] ?? 4;
+                    return aPriority - bPriority;
+                });
+            };
+
             const getTasksByView = () => {
                 // Only filter if we're on tasks or goals tab
                 if (activeTab !== 'tasks' && activeTab !== 'goals') return [];
@@ -2051,16 +2061,17 @@
                     return CATEGORIES.map(cat => ({
                         name: cat,
                         icon: getCategoryIcon(cat),
-                        tasks: activeTasks.filter(t => t.category === cat)
+                        tasks: sortByPriority(activeTasks.filter(t => t.category === cat))
                     })).filter(section => section.tasks.length > 0);
                 } else if (viewMode === 'time') {
                     return [
-                        { name: 'Today', icon: '📅', tasks: activeTasks },
+                        { name: 'Today', icon: '📅', tasks: sortByPriority(activeTasks) },
                         { name: 'This Week', icon: '📆', tasks: [] },
                         { name: 'This Month', icon: '🗓️', tasks: [] },
                         { name: 'Later', icon: '⏰', tasks: [] }
                     ].filter(section => section.tasks.length > 0);
                 } else if (viewMode === 'priority') {
+                    // Priority view doesn't need sorting within sections since they're already grouped by priority
                     return PRIORITIES.map(pri => ({
                         name: pri,
                         icon: getPriorityIcon(pri),
@@ -2070,7 +2081,7 @@
                     return TIME_HORIZONS.map(horizon => ({
                         name: horizon,
                         icon: getTimeHorizonIcon(horizon),
-                        tasks: activeTasks.filter(t => (t.timeHorizon || 'Short-term') === horizon)
+                        tasks: sortByPriority(activeTasks.filter(t => (t.timeHorizon || 'Short-term') === horizon))
                     })).filter(section => section.tasks.length > 0);
                 }
             };
