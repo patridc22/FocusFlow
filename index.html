@@ -2231,8 +2231,8 @@
                         totalCompleted: 0,
                         totalActive: 0,
                         message: type === 'task'
-                            ? "🎯 Ready to crush some tasks? Add your first one to get started!"
-                            : "✨ Every step counts towards your big goals, keep going!"
+                            ? "Ready to get started? Add your first task to begin."
+                            : "Every step counts towards your big goals, keep going!"
                     };
                 }
 
@@ -2277,7 +2277,7 @@
                     message = messages[Math.floor(Math.random() * messages.length)];
                 } else {
                     // No completed tasks yet
-                    message = "👀 Nothing to see here just yet, let's start ticking things off first ;)";
+                    message = "Nothing to see here yet. Start completing tasks to see your insights!";
                 }
 
                 // Add today's achievement if any
@@ -2693,9 +2693,9 @@
                     `}</style>
                     <div className="header">
                         {activeTab === 'tasks' && <h1>Hey {profile.username}</h1>}
-                        {activeTab === 'goals' && <h1>Your Goals</h1>}
-                        {activeTab === 'profile' && <h1>{profile.username}</h1>}
-                        {activeTab === 'focus' && <h1>Focus Timer</h1>}
+                        {activeTab === 'goals' && <h1>My Goals</h1>}
+                        {activeTab === 'profile' && <h1>My Profile</h1>}
+                        {activeTab === 'focus' && <h1>Focus</h1>}
                     </div>
 
                     <div className="main-content">
@@ -2953,7 +2953,7 @@
                         <div className="section">
                             <div style={{ padding: '20px' }}>
                             <div className="profile-section">
-                                <h2 style={{ marginBottom: '20px', color: '#667eea' }}>👤 My Profile</h2>
+                                <h2 style={{ marginBottom: '20px', color: '#667eea' }}>Profile Settings</h2>
                                 <div style={{ fontSize: '5em', marginBottom: '10px' }}>{profile.avatar}</div>
                                 <input
                                     type="text"
@@ -2984,7 +2984,7 @@
                                     ))}
                                 </div>
 
-                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>🎨 Choose Your Theme</h3>
+                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>Theme</h3>
                                 <div className="theme-selector">
                                     {Object.keys(THEMES).map(themeKey => {
                                         const theme = THEMES[themeKey];
@@ -3001,7 +3001,7 @@
                                     })}
                                 </div>
 
-                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>⚙️ Preferences</h3>
+                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>Preferences</h3>
                                 <div style={{ background: 'white', border: '1px solid #e2e8f0', padding: '16px 20px', borderRadius: '12px' }}>
                                     <div className="preference-item">
                                         <div className="preference-info">
@@ -3037,7 +3037,7 @@
                                         transition: 'all 0.3s ease'
                                     }}
                                 >
-                                    {profileSaved ? '✅ Profile Saved!' : '💾 Save Profile'}
+                                    {profileSaved ? 'Profile Saved!' : 'Save Profile'}
                                 </button>
 
                                 <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>Statistics</h3>
@@ -3102,7 +3102,7 @@
                         <div className="section" style={{ maxWidth: '600px', margin: '0 auto' }}>
                             <div style={{ padding: '40px 20px', textAlign: 'center' }}>
                                 <h2 style={{ marginBottom: '40px', color: '#667eea', fontSize: '2em' }}>
-                                    ⏱️ Focus Timer
+                                    Timer
                                 </h2>
 
                                 {/* Timer Display */}
@@ -3134,7 +3134,7 @@
                                                 boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
                                             }}
                                         >
-                                            ▶️ Start
+                                            Start
                                         </button>
                                     ) : (
                                         <button
@@ -3151,7 +3151,7 @@
                                                 boxShadow: '0 4px 15px rgba(251, 191, 36, 0.4)'
                                             }}
                                         >
-                                            ⏸️ Pause
+                                            Pause
                                         </button>
                                     )}
                                     <button
@@ -3168,7 +3168,7 @@
                                             boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)'
                                         }}
                                     >
-                                        🔄 Reset
+                                        Reset
                                     </button>
                                 </div>
 
@@ -3229,7 +3229,7 @@
                                     textAlign: 'left',
                                     color: '#666'
                                 }}>
-                                    <p style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>💡 Focus Tips:</p>
+                                    <p style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>Focus Tips:</p>
                                     <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
                                         <li>Use 25-minute Pomodoro sessions for deep work</li>
                                         <li>Take 5-minute breaks between sessions</li>
