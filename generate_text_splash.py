@@ -2,21 +2,21 @@
 from PIL import Image, ImageDraw, ImageFont
 
 def create_text_splash(width, height, filename):
-    # Create white background
+    # Create clean white background
     img = Image.new('RGB', (width, height), 'white')
     draw = ImageDraw.Draw(img)
 
-    # Load font - clean, simple
+    # Small, elegant font - much more subtle
     try:
-        font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", int(height * 0.055))
+        font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", int(height * 0.030))
     except:
         try:
-            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(height * 0.055))
+            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(height * 0.030))
         except:
             font = ImageFont.load_default()
 
-    # Simple text
-    text = ".complete your tasks."
+    # Minimal text - just ".complete"
+    text = ".complete"
 
     # Get text size
     bbox = draw.textbbox((0, 0), text, font=font)
@@ -27,8 +27,8 @@ def create_text_splash(width, height, filename):
     x = (width - text_width) // 2
     y = (height - text_height) // 2
 
-    # Draw text - simple, clean color
-    draw.text((x, y), text, fill='#667eea', font=font)
+    # Draw text - very subtle grey, not attention-grabbing
+    draw.text((x, y), text, fill='#666666', font=font)
 
     # Save
     img.save(filename, 'PNG')

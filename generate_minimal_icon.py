@@ -6,23 +6,21 @@ def create_minimal_icon(size, filename):
     img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    # Modern flat design - solid purple background
-    # Using a clean, modern purple (#667eea)
+    # Elegant black background - timeless, classy
     corner_radius = int(size * 0.225)  # iOS-style rounded corners
-    draw.rounded_rectangle([(0, 0), (size, size)], corner_radius, fill='#667eea')
+    draw.rounded_rectangle([(0, 0), (size, size)], corner_radius, fill='#1a1a1a')
 
-    # Modern, clean font - larger, bolder
+    # Refined, elegant font - clean and sophisticated
     try:
-        # Try SF Pro or Helvetica for clean modern look
-        font_size = int(size * 0.50)
+        font_size = int(size * 0.48)
         font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", font_size)
     except:
         try:
-            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(size * 0.50))
+            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(size * 0.48))
         except:
             font = ImageFont.load_default()
 
-    # Simple ".c" text
+    # Elegant ".c" text
     text = ".c"
 
     # Get text bounding box
@@ -34,8 +32,8 @@ def create_minimal_icon(size, filename):
     x = (size - text_width) // 2
     y = (size - text_height) // 2 - int(size * 0.02)
 
-    # Draw text - NO SHADOW, clean and flat
-    draw.text((x, y), text, fill='white', font=font)
+    # Draw text in elegant off-white
+    draw.text((x, y), text, fill='#f5f5f5', font=font)
 
     # Save with transparency
     img.save(filename, 'PNG')
