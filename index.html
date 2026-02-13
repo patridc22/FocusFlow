@@ -1503,6 +1503,7 @@
             const [syncing, setSyncing] = useState(false);
             const [showAuth, setShowAuth] = useState(false);
             const [authMode, setAuthMode] = useState('signup'); // 'signup' or 'login'
+            const [authName, setAuthName] = useState('');
             const [authEmail, setAuthEmail] = useState('');
             const [authPassword, setAuthPassword] = useState('');
             const [authError, setAuthError] = useState('');
@@ -1946,13 +1947,19 @@
                         setUser(data.user);
                         setShowAuth(false);
 
+                        // Set username from signup form
+                        const newProfile = {
+                            ...profile,
+                            username: authName || 'Task Master'
+                        };
+                        setProfile(newProfile);
+
                         // Migrate localStorage data to Supabase
                         if (tasks.length > 0) {
                             await syncTasksToSupabase();
                         }
-                        if (profile.username !== 'Task Master') {
-                            await syncProfileToSupabase();
-                        }
+                        // Sync profile with new username
+                        await syncProfileToSupabase();
                         await syncCalendarToSupabase();
 
                         alert('✅ Account created! Your data is now synced to the cloud.');
@@ -2378,6 +2385,15 @@
                             {authError && <div className="auth-error">{authError}</div>}
 
                             <form className="auth-form" onSubmit={authMode === 'signup' ? handleSignup : handleLogin}>
+                                {authMode === 'signup' && (
+                                    <input
+                                        type="text"
+                                        placeholder="What should we call you?"
+                                        value={authName}
+                                        onChange={(e) => setAuthName(e.target.value)}
+                                        required
+                                    />
+                                )}
                                 <input
                                     type="email"
                                     placeholder="Email"
