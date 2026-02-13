@@ -6,41 +6,29 @@ def create_text_splash(width, height, filename):
     img = Image.new('RGB', (width, height), 'white')
     draw = ImageDraw.Draw(img)
 
-    # Load fonts
+    # Load font - clean, simple
     try:
-        title_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", int(height * 0.08))
-        subtitle_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", int(height * 0.04))
+        font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", int(height * 0.055))
     except:
         try:
-            title_font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(height * 0.08))
-            subtitle_font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(height * 0.04))
+            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(height * 0.055))
         except:
-            title_font = ImageFont.load_default()
-            subtitle_font = ImageFont.load_default()
+            font = ImageFont.load_default()
 
-    # Text
-    title = ".complete"
-    subtitle = "your tasks & focus"
+    # Simple text
+    text = ".complete your tasks."
 
-    # Get text sizes
-    title_bbox = draw.textbbox((0, 0), title, font=title_font)
-    title_width = title_bbox[2] - title_bbox[0]
-    title_height = title_bbox[3] - title_bbox[1]
+    # Get text size
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
 
-    subtitle_bbox = draw.textbbox((0, 0), subtitle, font=subtitle_font)
-    subtitle_width = subtitle_bbox[2] - subtitle_bbox[0]
-    subtitle_height = subtitle_bbox[3] - subtitle_bbox[1]
+    # Center position
+    x = (width - text_width) // 2
+    y = (height - text_height) // 2
 
-    # Center positions
-    title_x = (width - title_width) // 2
-    title_y = (height - title_height - subtitle_height - 20) // 2
-
-    subtitle_x = (width - subtitle_width) // 2
-    subtitle_y = title_y + title_height + 20
-
-    # Draw text
-    draw.text((title_x, title_y), title, fill='#667eea', font=title_font)
-    draw.text((subtitle_x, subtitle_y), subtitle, fill='#999999', font=subtitle_font)
+    # Draw text - simple, clean color
+    draw.text((x, y), text, fill='#667eea', font=font)
 
     # Save
     img.save(filename, 'PNG')
