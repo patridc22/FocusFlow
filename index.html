@@ -1023,7 +1023,7 @@
                 secondary: '#764ba2',
                 gradient: 'linear-gradient(135deg, #a8c0ff 0%, #c5a3ff 50%, #e0c3fc 100%)',
                 accent: '#7c3aed',
-                text: '#ffffff'
+                text: '#1a1a2e'
             },
             'cotton-candy': {
                 name: '🍭 Cotton Candy',
@@ -1039,7 +1039,7 @@
                 secondary: '#d4a574',
                 gradient: 'linear-gradient(135deg, #c9a88e 0%, #d9c4b0 50%, #e8dcd0 100%)',
                 accent: '#a8805f',
-                text: '#ffffff'
+                text: '#2d2416'
             },
             'peach-cream': {
                 name: '🍑 Peach Cream',
@@ -1071,7 +1071,7 @@
                 secondary: '#b89968',
                 gradient: 'linear-gradient(135deg, #d4c4b0 0%, #b89968 50%, #9d8157 100%)',
                 accent: '#8a6e55',
-                text: '#ffffff'
+                text: '#2d2416'
             },
             'blush-nude': {
                 name: '💋 Blush Nude',
@@ -1111,7 +1111,7 @@
                 secondary: '#8b5cf6',
                 gradient: 'linear-gradient(135deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%)',
                 accent: '#6d28d9',
-                text: '#ffffff'
+                text: '#1a1a2e'
             },
             'lemon-pop': {
                 name: '🍋 Lemon Pop',
@@ -1135,7 +1135,7 @@
                 secondary: '#60a5fa',
                 gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 50%, #4c85e8 100%)',
                 accent: '#2563eb',
-                text: '#ffffff'
+                text: '#0a1929'
             },
             'sunset-glow': {
                 name: '🌅 Sunset Glow',
@@ -1220,7 +1220,7 @@
                 secondary: '#06b6d4',
                 gradient: `radial-gradient(circle at 20% 50%, #a7f3d0 0%, #5eead4 25%, #2dd4bf 50%, #14b8a6 75%, #0d9488 100%)`,
                 accent: '#14b8a6',
-                text: '#ffffff',
+                text: '#0a2e2a',
                 pattern: true
             },
             'coral-reef': {
@@ -2415,35 +2415,104 @@
                     <style>{`
                         body {
                             background: ${currentTheme.gradient};
-                            color: ${currentTheme.text} !important;
+                            color: ${currentTheme.text};
                             ${currentTheme.pattern ? 'background-blend-mode: overlay;' : ''}
                         }
-                        /* Apply theme text color to all elements */
-                        * {
-                            color: ${currentTheme.text} !important;
+
+                        /* Main header */
+                        .header, .header h1, .header * {
+                            color: ${currentTheme.text};
                         }
-                        /* Override for elements with solid white/light backgrounds */
-                        .section, .task-card, .modal-content, .calendar-provider,
-                        input[type="text"], input[type="email"], input[type="password"],
-                        textarea, select, .preference-item {
-                            background: rgba(255, 255, 255, 0.95) !important;
-                            color: #333 !important;
+
+                        /* Stats cards - use theme text color */
+                        .stats, .stat-card, .stat-card h3, .stat-card p {
+                            color: ${currentTheme.text};
                         }
-                        .section *, .task-card *, .modal-content *, .calendar-provider *,
-                        input[type="text"], input[type="email"], input[type="password"],
-                        textarea, select, .preference-item * {
-                            color: #333 !important;
+
+                        /* Insights card - use theme text color */
+                        .insights-card, .insights-card *, .insights-header,
+                        .insight-item, .insight-value, .insight-label, .insight-message {
+                            color: ${currentTheme.text};
                         }
-                        /* Stats cards with transparent/gradient backgrounds use theme text */
-                        .stat-card, .stat-card *, .insights-card, .insights-card * {
-                            color: ${currentTheme.text} !important;
+
+                        /* Navigation tabs */
+                        .nav-bottom, .nav-item, .nav-item span {
+                            color: ${currentTheme.text};
                         }
+                        .nav-item.active {
+                            color: ${currentTheme.text};
+                        }
+
+                        /* Tab buttons */
+                        .tab-btn {
+                            color: ${currentTheme.text};
+                        }
+                        .tab-btn.active {
+                            color: ${currentTheme.text};
+                        }
+
+                        /* View mode buttons */
+                        .view-mode, .view-btn {
+                            color: ${currentTheme.text};
+                        }
+
+                        /* Task count badge */
+                        .task-count {
+                            color: white;
+                        }
+
+                        /* Sections with white backgrounds - force dark text */
+                        .section {
+                            background: white;
+                            color: #333;
+                        }
+                        .section h2, .section h3, .section p, .section span, .section div,
+                        .section label, .section input, .section textarea {
+                            color: #333;
+                        }
+
+                        /* Task cards - dark text on white */
+                        .task-card, .task-card *, .task-title, .task-details, .task-meta {
+                            color: #333;
+                        }
+
+                        /* Modal - dark text */
+                        .modal-content, .modal-content h2, .modal-content label,
+                        .modal-content input, .modal-content textarea, .modal-content select,
+                        .modal-content p {
+                            color: #333;
+                        }
+
+                        /* Calendar providers */
+                        .calendar-provider, .calendar-provider * {
+                            color: #333;
+                        }
+
+                        /* Profile sections */
+                        .profile-section h2, .profile-section h3 {
+                            color: #667eea;
+                        }
+
+                        /* Theme selector */
+                        .theme-name {
+                            color: #333;
+                        }
+
+                        /* Preference items */
+                        .preference-item, .preference-title, .preference-desc {
+                            color: #333;
+                        }
+
+                        /* Buttons */
                         .btn-primary {
                             background: ${currentTheme.primary};
-                            color: white !important;
+                            color: white;
                         }
-                        .btn-primary * {
-                            color: white !important;
+                        .btn-secondary {
+                            color: ${currentTheme.text};
+                        }
+                        .btn-calendar {
+                            color: #333;
                         }
                         .btn-primary:hover {
                             background: ${currentTheme.accent};
