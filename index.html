@@ -1043,12 +1043,152 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
             .header h1 {
-                font-size: 1.3em;
+                font-size: 1.5em;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card h3 {
+                font-size: 1.5em;
+            }
+
+            .stat-card p {
+                font-size: 0.85em;
+            }
+
+            .theme-selector {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
             }
 
             .avatar-selector {
                 grid-template-columns: repeat(4, 1fr);
+            }
+
+            .modal-content {
+                width: 95%;
+                max-width: 95%;
+                padding: 20px;
+                margin: 20px auto;
+            }
+
+            .main-content {
+                padding-bottom: 90px;
+            }
+
+            .bottom-nav {
+                padding: 6px 0 max(12px, env(safe-area-inset-bottom)) 0;
+            }
+
+            .nav-item {
+                font-size: 0.7em;
+                padding: 4px 8px;
+                gap: 2px;
+            }
+
+            .nav-item-icon {
+                font-size: 1.4em;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .task-item, .goal-item {
+                padding: 15px;
+            }
+
+            .insights-card {
+                padding: 15px;
+            }
+
+            .insights-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .view-mode {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .view-btn {
+                padding: 8px 16px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 12px;
+            }
+
+            .stat-card h3 {
+                font-size: 1.3em;
+            }
+
+            .theme-selector {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .theme-option {
+                padding: 8px;
+            }
+
+            .theme-preview {
+                height: 40px;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+
+            .nav-item {
+                font-size: 0.65em;
+            }
+
+            .nav-item-icon {
+                font-size: 1.3em;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .insight-value {
+                font-size: 1.5em;
+            }
+
+            .view-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
             }
         }
     </style>
