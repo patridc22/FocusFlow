@@ -1520,6 +1520,11 @@
             const [authError, setAuthError] = useState('');
             const [profileSaved, setProfileSaved] = useState(false);
 
+            // Focus timer state
+            const [timerSeconds, setTimerSeconds] = useState(0);
+            const [timerRunning, setTimerRunning] = useState(false);
+            const [timerInterval, setTimerInterval] = useState(null);
+
             // Check auth and load data
             useEffect(() => {
                 checkUser();
@@ -2042,6 +2047,46 @@
                 }
                 setProfileSaved(true);
                 setTimeout(() => setProfileSaved(false), 2000);
+            };
+
+            // Timer functions
+            const startTimer = () => {
+                if (!timerRunning) {
+                    setTimerRunning(true);
+                    const interval = setInterval(() => {
+                        setTimerSeconds(prev => prev + 1);
+                    }, 1000);
+                    setTimerInterval(interval);
+                }
+            };
+
+            const pauseTimer = () => {
+                if (timerRunning) {
+                    setTimerRunning(false);
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        setTimerInterval(null);
+                    }
+                }
+            };
+
+            const resetTimer = () => {
+                setTimerRunning(false);
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    setTimerInterval(null);
+                }
+                setTimerSeconds(0);
+            };
+
+            const formatTime = (seconds) => {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                if (hrs > 0) {
+                    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
             };
 
             const toggleSection = (section) => {
@@ -3113,6 +3158,150 @@
                         </div>
                     )}
 
+                    {/* Focus Timer Content */}
+                    {activeTab === 'focus' && (
+                        <div className="section" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+                                <h2 style={{ marginBottom: '40px', color: '#667eea', fontSize: '2em' }}>
+                                    ⏱️ Focus Timer
+                                </h2>
+
+                                {/* Timer Display */}
+                                <div style={{
+                                    fontSize: '5em',
+                                    fontWeight: '800',
+                                    color: '#667eea',
+                                    marginBottom: '40px',
+                                    fontVariantNumeric: 'tabular-nums',
+                                    letterSpacing: '0.05em'
+                                }}>
+                                    {formatTime(timerSeconds)}
+                                </div>
+
+                                {/* Control Buttons */}
+                                <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginBottom: '40px' }}>
+                                    {!timerRunning ? (
+                                        <button
+                                            onClick={startTimer}
+                                            style={{
+                                                padding: '15px 40px',
+                                                fontSize: '1.2em',
+                                                fontWeight: 'bold',
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '50px',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+                                            }}
+                                        >
+                                            ▶️ Start
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={pauseTimer}
+                                            style={{
+                                                padding: '15px 40px',
+                                                fontSize: '1.2em',
+                                                fontWeight: 'bold',
+                                                background: '#fbbf24',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '50px',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 15px rgba(251, 191, 36, 0.4)'
+                                            }}
+                                        >
+                                            ⏸️ Pause
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={resetTimer}
+                                        style={{
+                                            padding: '15px 40px',
+                                            fontSize: '1.2em',
+                                            fontWeight: 'bold',
+                                            background: '#ef4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '50px',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)'
+                                        }}
+                                    >
+                                        🔄 Reset
+                                    </button>
+                                </div>
+
+                                {/* Quick Preset Buttons */}
+                                <div style={{ marginBottom: '30px' }}>
+                                    <p style={{ color: '#666', marginBottom: '15px', fontWeight: '600' }}>Quick Presets:</p>
+                                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                        <button
+                                            onClick={() => { resetTimer(); setTimerSeconds(1500); }}
+                                            style={{
+                                                padding: '10px 20px',
+                                                background: '#e0e7ff',
+                                                color: '#667eea',
+                                                border: 'none',
+                                                borderRadius: '20px',
+                                                cursor: 'pointer',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            25 min 🍅
+                                        </button>
+                                        <button
+                                            onClick={() => { resetTimer(); setTimerSeconds(300); }}
+                                            style={{
+                                                padding: '10px 20px',
+                                                background: '#fef3c7',
+                                                color: '#d97706',
+                                                border: 'none',
+                                                borderRadius: '20px',
+                                                cursor: 'pointer',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            5 min ☕
+                                        </button>
+                                        <button
+                                            onClick={() => { resetTimer(); setTimerSeconds(900); }}
+                                            style={{
+                                                padding: '10px 20px',
+                                                background: '#d1fae5',
+                                                color: '#059669',
+                                                border: 'none',
+                                                borderRadius: '20px',
+                                                cursor: 'pointer',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            15 min 🌿
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Tips */}
+                                <div style={{
+                                    background: '#f7fafc',
+                                    padding: '20px',
+                                    borderRadius: '15px',
+                                    textAlign: 'left',
+                                    color: '#666'
+                                }}>
+                                    <p style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>💡 Focus Tips:</p>
+                                    <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+                                        <li>Use 25-minute Pomodoro sessions for deep work</li>
+                                        <li>Take 5-minute breaks between sessions</li>
+                                        <li>Turn off notifications and close distractions</li>
+                                        <li>Track your focused time to build better habits</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     </div>
 
                     {/* Bottom Navigation */}
@@ -3164,6 +3353,13 @@
                                 }
                             </div>
                             <span>Calendar</span>
+                        </button>
+                        <button
+                            className={`nav-item ${activeTab === 'focus' ? 'active' : ''}`}
+                            onClick={() => switchTab('focus')}
+                        >
+                            <div className="nav-item-icon">⏱️</div>
+                            <span>Focus</span>
                         </button>
                     </div>
 
