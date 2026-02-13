@@ -19,8 +19,8 @@ def create_text_splash(width, height, filename):
             subtitle_font = ImageFont.load_default()
 
     # Text
-    title = "FocusFlow"
-    subtitle = "For the busy minds"
+    title = ".complete"
+    subtitle = "your tasks & focus"
 
     # Get text sizes
     title_bbox = draw.textbbox((0, 0), title, font=title_font)

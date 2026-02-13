@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="FocusFlow">
+    <meta name="apple-mobile-web-app-title" content=".complete">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -22,7 +22,7 @@
     <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/splash-1290x2796.png">
     <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/splash-750x1334.png">
 
-    <title>FocusFlow - For the busy minds</title>
+    <title>.complete - Focus & Task Management</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -1874,7 +1874,7 @@
                     return;
                 }
 
-                let icsContent = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//FocusFlow//ADHD Task Manager//EN\nCALSCALE:GREGORIAN\n';
+                let icsContent = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//.complete//Task Manager//EN\nCALSCALE:GREGORIAN\n';
 
                 activeTasks.forEach(task => {
                     const now = new Date();
@@ -1907,7 +1907,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'FocusFlow-Tasks.ics';
+                a.download = 'complete-Tasks.ics';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -2386,12 +2386,12 @@
                                 fontWeight: '800',
                                 marginBottom: '10px',
                                 letterSpacing: '-0.02em'
-                            }}>FocusFlow</h1>
+                            }}>.complete</h1>
                             <p style={{
                                 fontSize: '1.2em',
                                 fontWeight: '300',
                                 opacity: 0.9
-                            }}>Your Personal Organization Station</p>
+                            }}>Focus & Task Management</p>
                         </div>
                         <style>{`
                             @keyframes fadeIn {
@@ -2468,7 +2468,7 @@
                             }
                         `}</style>
                         <div className="auth-container">
-                            <h1>🎯 FocusFlow</h1>
+                            <h1>🎯 .complete</h1>
                             <p>{authMode === 'signup' ? 'Create your account to sync across devices' : 'Welcome back! Log in to access your tasks'}</p>
 
                             {authError && <div className="auth-error">{authError}</div>}
