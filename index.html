@@ -2415,16 +2415,35 @@
                     <style>{`
                         body {
                             background: ${currentTheme.gradient};
-                            color: ${currentTheme.text};
+                            color: ${currentTheme.text} !important;
                             ${currentTheme.pattern ? 'background-blend-mode: overlay;' : ''}
                         }
-                        .stat-card, .insight-value, .insight-label, .insight-message,
-                        .section, .task-card, .modal-content, h2, h3, p, span, div {
-                            color: ${currentTheme.text};
+                        /* Apply theme text color to all elements */
+                        * {
+                            color: ${currentTheme.text} !important;
+                        }
+                        /* Override for elements with solid white/light backgrounds */
+                        .section, .task-card, .modal-content, .calendar-provider,
+                        input[type="text"], input[type="email"], input[type="password"],
+                        textarea, select, .preference-item {
+                            background: rgba(255, 255, 255, 0.95) !important;
+                            color: #333 !important;
+                        }
+                        .section *, .task-card *, .modal-content *, .calendar-provider *,
+                        input[type="text"], input[type="email"], input[type="password"],
+                        textarea, select, .preference-item * {
+                            color: #333 !important;
+                        }
+                        /* Stats cards with transparent/gradient backgrounds use theme text */
+                        .stat-card, .stat-card *, .insights-card, .insights-card * {
+                            color: ${currentTheme.text} !important;
                         }
                         .btn-primary {
                             background: ${currentTheme.primary};
-                            color: white;
+                            color: white !important;
+                        }
+                        .btn-primary * {
+                            color: white !important;
                         }
                         .btn-primary:hover {
                             background: ${currentTheme.accent};
