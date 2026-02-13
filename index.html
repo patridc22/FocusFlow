@@ -2370,6 +2370,30 @@
                 });
             };
 
+            // Dynamic greetings with wellness reminders
+            const getTasksGreeting = (username) => {
+                const greetings = [
+                    `Hey ${username}, shall we get back to it?`,
+                    `Hey ${username}, need tasks done or some breathing?`,
+                    `${username}, ready to tackle your day?`,
+                    `Hey ${username}, let's make today count`,
+                    `${username}, time to get things done`,
+                    `Hey ${username}, have you had water today?`,
+                    `${username}, remember to take breaks`,
+                    `Hey ${username}, let's be productive`,
+                    `${username}, don't forget to hydrate`,
+                    `Hey ${username}, ready to crush it?`,
+                    `${username}, how are you feeling today?`,
+                    `Hey ${username}, take a deep breath first`,
+                    `${username}, let's focus on what matters`,
+                    `Hey ${username}, remember to stretch`,
+                    `${username}, one step at a time`
+                ];
+                const hour = new Date().getHours();
+                const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+                return randomGreeting;
+            };
+
             // Sort tasks by priority (Urgent -> High -> Medium -> Low)
             const sortByPriority = (tasks) => {
                 const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
@@ -2919,7 +2943,7 @@
                         }
                     `}</style>
                     <div className="header">
-                        {activeTab === 'tasks' && <h1>Hey {profile.username}</h1>}
+                        {activeTab === 'tasks' && <h1>{getTasksGreeting(profile.username)}</h1>}
                         {activeTab === 'goals' && <h1>My Goals</h1>}
                         {activeTab === 'profile' && <h1>My Profile</h1>}
                         {activeTab === 'focus' && <h1>Focus</h1>}
