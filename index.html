@@ -1571,6 +1571,11 @@
             const [timerRunning, setTimerRunning] = useState(false);
             const [timerInterval, setTimerInterval] = useState(null);
 
+            // Breathing exercise state
+            const [breathingActive, setBreathingActive] = useState(false);
+            const [breathingPhase, setBreathingPhase] = useState('inhale'); // 'inhale', 'hold', 'exhale'
+            const [breathingCycle, setBreathingCycle] = useState(0);
+
             // Check auth and load data
             useEffect(() => {
                 checkUser();
@@ -2135,6 +2140,42 @@
                 }
                 return `${mins}:${secs.toString().padStart(2, '0')}`;
             };
+
+            // Breathing exercise functions (4-7-8 technique)
+            const startBreathing = () => {
+                setBreathingActive(true);
+                setBreathingPhase('inhale');
+                setBreathingCycle(0);
+            };
+
+            const stopBreathing = () => {
+                setBreathingActive(false);
+                setBreathingPhase('inhale');
+                setBreathingCycle(0);
+            };
+
+            // Breathing cycle effect (4-7-8: inhale 4s, hold 7s, exhale 8s)
+            useEffect(() => {
+                if (!breathingActive) return;
+
+                const cycleBreathing = () => {
+                    setBreathingCycle(prev => prev + 1);
+                };
+
+                let timeout;
+                if (breathingPhase === 'inhale') {
+                    timeout = setTimeout(() => setBreathingPhase('hold'), 4000);
+                } else if (breathingPhase === 'hold') {
+                    timeout = setTimeout(() => setBreathingPhase('exhale'), 7000);
+                } else if (breathingPhase === 'exhale') {
+                    timeout = setTimeout(() => {
+                        setBreathingPhase('inhale');
+                        cycleBreathing();
+                    }, 8000);
+                }
+
+                return () => clearTimeout(timeout);
+            }, [breathingActive, breathingPhase]);
 
             const toggleSection = (section) => {
                 setCollapsedSections({
@@ -3188,7 +3229,7 @@
                                                 fontWeight: '600'
                                             }}
                                         >
-                                            25 min 🍅
+                                            25 min
                                         </button>
                                         <button
                                             onClick={() => { resetTimer(); setTimerSeconds(300); }}
@@ -3202,7 +3243,7 @@
                                                 fontWeight: '600'
                                             }}
                                         >
-                                            5 min ☕
+                                            5 min
                                         </button>
                                         <button
                                             onClick={() => { resetTimer(); setTimerSeconds(900); }}
@@ -3216,7 +3257,83 @@
                                                 fontWeight: '600'
                                             }}
                                         >
-                                            15 min 🌿
+                                            15 min
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Breathing Exercise */}
+                                <div style={{ marginTop: '50px', marginBottom: '30px' }}>
+                                    <h3 style={{ marginBottom: '20px', color: '#667eea', fontSize: '1.5em' }}>Mindful Breathing</h3>
+                                    <p style={{ color: '#666', marginBottom: '20px', fontSize: '0.95em' }}>
+                                        4-7-8 breathing technique: Inhale for 4s, Hold for 7s, Exhale for 8s
+                                    </p>
+
+                                    {/* Breathing Circle */}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginBottom: '30px'
+                                    }}>
+                                        <div style={{
+                                            position: 'relative',
+                                            width: '200px',
+                                            height: '200px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: '20px'
+                                        }}>
+                                            <div style={{
+                                                width: breathingActive
+                                                    ? (breathingPhase === 'inhale' ? '180px' : breathingPhase === 'hold' ? '180px' : '100px')
+                                                    : '140px',
+                                                height: breathingActive
+                                                    ? (breathingPhase === 'inhale' ? '180px' : breathingPhase === 'hold' ? '180px' : '100px')
+                                                    : '140px',
+                                                borderRadius: '50%',
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                transition: breathingActive
+                                                    ? (breathingPhase === 'inhale' ? 'all 4s ease-in-out' : breathingPhase === 'hold' ? 'all 0s' : 'all 8s ease-in-out')
+                                                    : 'all 1s ease',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'white',
+                                                fontSize: '1.2em',
+                                                fontWeight: '600',
+                                                boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)'
+                                            }}>
+                                                {breathingActive ? (
+                                                    breathingPhase === 'inhale' ? 'Inhale' :
+                                                    breathingPhase === 'hold' ? 'Hold' :
+                                                    'Exhale'
+                                                ) : 'Ready'}
+                                            </div>
+                                        </div>
+
+                                        {breathingActive && (
+                                            <p style={{ color: '#667eea', fontWeight: '600', marginBottom: '15px' }}>
+                                                Cycle {breathingCycle + 1}
+                                            </p>
+                                        )}
+
+                                        <button
+                                            onClick={breathingActive ? stopBreathing : startBreathing}
+                                            style={{
+                                                padding: '12px 30px',
+                                                fontSize: '1.1em',
+                                                fontWeight: 'bold',
+                                                background: breathingActive ? '#ef4444' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '50px',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                            }}
+                                        >
+                                            {breathingActive ? 'Stop' : 'Start Breathing'}
                                         </button>
                                     </div>
                                 </div>
