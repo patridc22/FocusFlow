@@ -1,7 +1,7 @@
 {
-  "name": "FocusFlow - ADHD Task & Goal Manager",
+  "name": "FocusFlow - Your Personal Organization Station",
   "short_name": "FocusFlow",
-  "description": "ADHD-friendly task and goal manager with gamification, AI insights, and beautiful themes",
+  "description": "Your personal organization station - task and goal manager with AI insights and beautiful themes",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#667eea",
