@@ -1507,7 +1507,10 @@
         const CELEBRATION_EMOJIS = ['🎉', '⭐', '✨', '🌟', '💫', '🎊', '🏆', '👏', '💪', '🔥', '🚀', '💯', '🎯', '⚡', '🌈'];
 
         function App() {
-            const [tasks, setTasks] = useState([]);
+            const [tasks, setTasks] = useState(() => {
+                const saved = localStorage.getItem('focusflow_tasks');
+                return saved ? JSON.parse(saved) : [];
+            });
             const [showAddModal, setShowAddModal] = useState(false);
             const [addingType, setAddingType] = useState('task'); // 'task' or 'goal'
             const [activeTab, setActiveTab] = useState(() => {
@@ -1518,24 +1521,30 @@
             const [celebration, setCelebration] = useState(null);
             const [floatingEmojis, setFloatingEmojis] = useState([]);
 
-            const [calendarSettings, setCalendarSettings] = useState({
-                googleConnected: false,
-                googleEmail: '',
-                appleCalendarEnabled: false,
-                autoSync: true
+            const [calendarSettings, setCalendarSettings] = useState(() => {
+                const saved = localStorage.getItem('focusflow_calendar');
+                return saved ? JSON.parse(saved) : {
+                    googleConnected: false,
+                    googleEmail: '',
+                    appleCalendarEnabled: false,
+                    autoSync: true
+                };
             });
 
-            const [profile, setProfile] = useState({
-                username: 'Task Master',
-                avatar: '🚀',
-                level: 1,
-                xp: 0,
-                currentStreak: 0,
-                bestStreak: 0,
-                lastCompletedDate: null,
-                totalCompleted: 0,
-                showBadges: true,
-                theme: 'mermaid-dreams'
+            const [profile, setProfile] = useState(() => {
+                const saved = localStorage.getItem('focusflow_profile');
+                return saved ? JSON.parse(saved) : {
+                    username: 'Task Master',
+                    avatar: '🚀',
+                    level: 1,
+                    xp: 0,
+                    currentStreak: 0,
+                    bestStreak: 0,
+                    lastCompletedDate: null,
+                    totalCompleted: 0,
+                    showBadges: true,
+                    theme: 'mermaid-dreams'
+                };
             });
 
             const [newTask, setNewTask] = useState({
