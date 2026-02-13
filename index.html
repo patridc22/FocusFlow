@@ -2172,6 +2172,9 @@
                         `💚 ${completionRate}% completion rate. Every journey begins with a single step!`
                     ];
                     message = messages[Math.floor(Math.random() * messages.length)];
+                } else {
+                    // No completed tasks yet
+                    message = "👀 Nothing to see here just yet, let's start ticking things off first ;)";
                 }
 
                 // Add today's achievement if any
