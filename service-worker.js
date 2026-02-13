@@ -1,7 +1,7 @@
 const CACHE_NAME = 'complete-v3';
 const urlsToCache = [
-  '/index.html',
-  '/manifest.json'
+  '/index.html'
+  // Don't cache manifest, icons, or splash screens - always fetch fresh
 ];
 
 // Install service worker
