@@ -10,17 +10,17 @@ def create_minimal_icon(size, filename):
     corner_radius = int(size * 0.225)  # iOS-style rounded corners
     draw.rounded_rectangle([(0, 0), (size, size)], corner_radius, fill='#1a1a1a')
 
-    # Refined, elegant font - clean and sophisticated
+    # Much smaller, refined font - with lots of whitespace
     try:
-        font_size = int(size * 0.48)
+        font_size = int(size * 0.28)  # Reduced from 0.48 to 0.28
         font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", font_size)
     except:
         try:
-            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(size * 0.48))
+            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", int(size * 0.28))
         except:
             font = ImageFont.load_default()
 
-    # Elegant ".c" text
+    # Elegant ".c" text - smaller and more subtle
     text = ".c"
 
     # Get text bounding box
