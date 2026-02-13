@@ -8,13 +8,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FocusFlow">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>FocusFlow - ADHD Task Manager</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -1004,6 +1006,11 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://pofjuaaizxnjgsmokaac.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvZmp1YWFpenhuamdzbW9rYWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MzE4ODUsImV4cCI6MjA4NjUwNzg4NX0.Ewe-jS19axFgrfDdHQWP2L-a6rfKk_BWv7SkPkY3044';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const CATEGORIES = ['Work', 'Personal', 'Health', 'Learning', 'Finance', 'Social'];
         const PRIORITIES = ['Low', 'Medium', 'High', 'Urgent'];
         const TIME_HORIZONS = ['Short-term', 'Mid-term', 'Long-term'];
@@ -1450,7 +1457,9 @@
             const [tasks, setTasks] = useState([]);
             const [showAddModal, setShowAddModal] = useState(false);
             const [addingType, setAddingType] = useState('task'); // 'task' or 'goal'
-            const [activeTab, setActiveTab] = useState('tasks'); // 'tasks', 'goals', 'profile', 'calendar'
+            const [activeTab, setActiveTab] = useState(() => {
+                return localStorage.getItem('focusflow_activeTab') || 'tasks';
+            });
             const [viewMode, setViewMode] = useState('category');
             const [collapsedSections, setCollapsedSections] = useState({});
             const [celebration, setCelebration] = useState(null);
@@ -1488,29 +1497,207 @@
                 dueTime: ''
             });
 
-            // Load data from localStorage
-            useEffect(() => {
-                const savedTasks = localStorage.getItem('focusflow_tasks');
-                const savedProfile = localStorage.getItem('focusflow_profile');
-                const savedCalendar = localStorage.getItem('focusflow_calendar');
+            // Auth and sync state
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [syncing, setSyncing] = useState(false);
+            const [showAuth, setShowAuth] = useState(false);
+            const [authMode, setAuthMode] = useState('signup'); // 'signup' or 'login'
+            const [authEmail, setAuthEmail] = useState('');
+            const [authPassword, setAuthPassword] = useState('');
+            const [authError, setAuthError] = useState('');
+            const [profileSaved, setProfileSaved] = useState(false);
 
-                if (savedTasks) setTasks(JSON.parse(savedTasks));
-                if (savedProfile) setProfile(JSON.parse(savedProfile));
-                if (savedCalendar) setCalendarSettings(JSON.parse(savedCalendar));
+            // Check auth and load data
+            useEffect(() => {
+                checkUser();
             }, []);
 
-            // Save data to localStorage
+            const checkUser = async () => {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    setUser(session?.user ?? null);
+
+                    if (session?.user) {
+                        await loadFromSupabase(session.user);
+                    } else {
+                        // Not logged in, load from localStorage as fallback
+                        const savedTasks = localStorage.getItem('focusflow_tasks');
+                        const savedProfile = localStorage.getItem('focusflow_profile');
+                        const savedCalendar = localStorage.getItem('focusflow_calendar');
+
+                        if (savedTasks) setTasks(JSON.parse(savedTasks));
+                        if (savedProfile) setProfile(JSON.parse(savedProfile));
+                        if (savedCalendar) setCalendarSettings(JSON.parse(savedCalendar));
+
+                        setShowAuth(true);
+                    }
+                } catch (error) {
+                    console.error('Auth error:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const loadFromSupabase = async (user) => {
+                try {
+                    setSyncing(true);
+
+                    // Load tasks
+                    const { data: tasksData } = await supabase
+                        .from('tasks')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .order('created_at', { ascending: false });
+
+                    if (tasksData && tasksData.length > 0) {
+                        setTasks(tasksData);
+                    }
+
+                    // Load profile
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (profileData) {
+                        setProfile({
+                            username: profileData.username,
+                            avatar: profileData.avatar,
+                            level: profileData.level,
+                            xp: profileData.xp,
+                            currentStreak: profileData.current_streak,
+                            bestStreak: profileData.best_streak,
+                            lastCompletedDate: profileData.last_completed_date,
+                            totalCompleted: profileData.total_completed,
+                            showBadges: profileData.show_badges,
+                            theme: profileData.theme
+                        });
+                    }
+
+                    // Load calendar settings
+                    const { data: calendarData } = await supabase
+                        .from('calendar_settings')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    if (calendarData) {
+                        setCalendarSettings({
+                            googleConnected: calendarData.google_connected,
+                            googleEmail: calendarData.google_email || '',
+                            appleCalendarEnabled: calendarData.apple_calendar_enabled,
+                            autoSync: calendarData.auto_sync
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading from Supabase:', error);
+                } finally {
+                    setSyncing(false);
+                }
+            };
+
+            // Save data to localStorage and Supabase
             useEffect(() => {
-                localStorage.setItem('focusflow_tasks', JSON.stringify(tasks));
+                if (!loading) {
+                    localStorage.setItem('focusflow_tasks', JSON.stringify(tasks));
+                    if (user) syncTasksToSupabase();
+                }
             }, [tasks]);
 
             useEffect(() => {
-                localStorage.setItem('focusflow_profile', JSON.stringify(profile));
+                if (!loading) {
+                    localStorage.setItem('focusflow_profile', JSON.stringify(profile));
+                    if (user) syncProfileToSupabase();
+                }
             }, [profile]);
 
             useEffect(() => {
-                localStorage.setItem('focusflow_calendar', JSON.stringify(calendarSettings));
+                if (!loading) {
+                    localStorage.setItem('focusflow_calendar', JSON.stringify(calendarSettings));
+                    if (user) syncCalendarToSupabase();
+                }
             }, [calendarSettings]);
+
+            // Save active tab to localStorage
+            useEffect(() => {
+                localStorage.setItem('focusflow_activeTab', activeTab);
+            }, [activeTab]);
+
+            const syncTasksToSupabase = async () => {
+                if (!user) return;
+
+                try {
+                    // Delete all existing tasks
+                    await supabase.from('tasks').delete().eq('user_id', user.id);
+
+                    // Insert current tasks if any
+                    if (tasks.length > 0) {
+                        const tasksToInsert = tasks.map(t => ({
+                        id: t.id,
+                        user_id: user.id,
+                        title: t.title,
+                        notes: t.notes || '',
+                        category: t.category,
+                        priority: t.priority,
+                        time_horizon: t.timeHorizon,
+                        type: t.type,
+                        reminder: t.reminder || false,
+                        due_date: t.dueDate || null,
+                        due_time: t.dueTime || null,
+                        completed: t.completed,
+                        created_at: t.createdAt,
+                        completed_at: t.completedAt || null,
+                        updated_at: new Date().toISOString()
+                    }));
+
+                        await supabase.from('tasks').insert(tasksToInsert);
+                    }
+                } catch (error) {
+                    console.error('Error syncing tasks:', error);
+                }
+            };
+
+            const syncProfileToSupabase = async () => {
+                if (!user) return;
+
+                try {
+                    await supabase.from('profiles').upsert({
+                        id: user.id,
+                        username: profile.username,
+                        avatar: profile.avatar,
+                        level: profile.level,
+                        xp: profile.xp,
+                        current_streak: profile.currentStreak,
+                        best_streak: profile.bestStreak,
+                        last_completed_date: profile.lastCompletedDate,
+                        total_completed: profile.totalCompleted,
+                        show_badges: profile.showBadges,
+                        theme: profile.theme,
+                        updated_at: new Date().toISOString()
+                    });
+                } catch (error) {
+                    console.error('Error syncing profile:', error);
+                }
+            };
+
+            const syncCalendarToSupabase = async () => {
+                if (!user) return;
+
+                try {
+                    await supabase.from('calendar_settings').upsert({
+                        user_id: user.id,
+                        google_connected: calendarSettings.googleConnected,
+                        google_email: calendarSettings.googleEmail || null,
+                        apple_calendar_enabled: calendarSettings.appleCalendarEnabled,
+                        auto_sync: calendarSettings.autoSync,
+                        updated_at: new Date().toISOString()
+                    });
+                } catch (error) {
+                    console.error('Error syncing calendar:', error);
+                }
+            };
 
             const openAddModal = (type) => {
                 setAddingType(type);
@@ -1730,6 +1917,94 @@
                 } else {
                     alert('Please connect a calendar first!');
                 }
+            };
+
+            // Auth functions
+            const handleSignup = async (e) => {
+                e.preventDefault();
+                setAuthError('');
+
+                try {
+                    const { data, error } = await supabase.auth.signUp({
+                        email: authEmail,
+                        password: authPassword,
+                    });
+
+                    if (error) throw error;
+
+                    if (data.user) {
+                        setUser(data.user);
+                        setShowAuth(false);
+
+                        // Migrate localStorage data to Supabase
+                        if (tasks.length > 0) {
+                            await syncTasksToSupabase();
+                        }
+                        if (profile.username !== 'Task Master') {
+                            await syncProfileToSupabase();
+                        }
+                        await syncCalendarToSupabase();
+
+                        alert('Account created! Your data is now synced to the cloud.');
+                    }
+                } catch (error) {
+                    setAuthError(error.message);
+                }
+            };
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setAuthError('');
+
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: authEmail,
+                        password: authPassword,
+                    });
+
+                    if (error) throw error;
+
+                    if (data.user) {
+                        setUser(data.user);
+                        setShowAuth(false);
+                        await loadFromSupabase(data.user);
+                    }
+                } catch (error) {
+                    setAuthError(error.message);
+                }
+            };
+
+            const handleLogout = async () => {
+                try {
+                    await supabase.auth.signOut();
+                    setUser(null);
+                    setTasks([]);
+                    setProfile({
+                        username: 'Task Master',
+                        avatar: '🚀',
+                        level: 1,
+                        xp: 0,
+                        currentStreak: 0,
+                        bestStreak: 0,
+                        lastCompletedDate: null,
+                        totalCompleted: 0,
+                        showBadges: true,
+                        theme: 'mermaid-dreams'
+                    });
+                    setShowAuth(true);
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            };
+
+            const handleSaveProfile = async () => {
+                // Manual save trigger
+                localStorage.setItem('focusflow_profile', JSON.stringify(profile));
+                if (user) {
+                    await syncProfileToSupabase();
+                }
+                setProfileSaved(true);
+                setTimeout(() => setProfileSaved(false), 2000);
             };
 
             const toggleSection = (section) => {
@@ -1995,15 +2270,142 @@
                 }
             }, [currentTheme]);
 
+            // Show loading screen
+            if (loading) {
+                return (
+                    <div className="app-container" style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '100vh',
+                        fontSize: '24px'
+                    }}>
+                        <div>
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>🎯</div>
+                            <div>Loading FocusFlow...</div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Show auth screen if not logged in
+            if (showAuth) {
+                return (
+                    <div className="app-container">
+                        <style>{`
+                            .auth-container {
+                                max-width: 400px;
+                                margin: 100px auto;
+                                padding: 40px;
+                                background: white;
+                                border-radius: 20px;
+                                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                            }
+                            .auth-container h1 {
+                                text-align: center;
+                                margin-bottom: 10px;
+                                font-size: 32px;
+                            }
+                            .auth-container p {
+                                text-align: center;
+                                color: #666;
+                                margin-bottom: 30px;
+                            }
+                            .auth-form input {
+                                width: 100%;
+                                padding: 12px;
+                                margin-bottom: 15px;
+                                border: 2px solid #e0e0e0;
+                                border-radius: 8px;
+                                font-size: 16px;
+                            }
+                            .auth-form button {
+                                width: 100%;
+                                padding: 12px;
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                border: none;
+                                border-radius: 8px;
+                                font-size: 16px;
+                                font-weight: bold;
+                                cursor: pointer;
+                                margin-bottom: 15px;
+                            }
+                            .auth-form button:hover {
+                                opacity: 0.9;
+                            }
+                            .auth-toggle {
+                                text-align: center;
+                                color: #666;
+                            }
+                            .auth-toggle a {
+                                color: #667eea;
+                                cursor: pointer;
+                                text-decoration: underline;
+                            }
+                            .auth-error {
+                                background: #fee;
+                                color: #c00;
+                                padding: 10px;
+                                border-radius: 8px;
+                                margin-bottom: 15px;
+                                text-align: center;
+                            }
+                        `}</style>
+                        <div className="auth-container">
+                            <h1>🎯 FocusFlow</h1>
+                            <p>{authMode === 'signup' ? 'Create your account to sync across devices' : 'Welcome back! Log in to access your tasks'}</p>
+
+                            {authError && <div className="auth-error">{authError}</div>}
+
+                            <form className="auth-form" onSubmit={authMode === 'signup' ? handleSignup : handleLogin}>
+                                <input
+                                    type="email"
+                                    placeholder="Email"
+                                    value={authEmail}
+                                    onChange={(e) => setAuthEmail(e.target.value)}
+                                    required
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Password (min 6 characters)"
+                                    value={authPassword}
+                                    onChange={(e) => setAuthPassword(e.target.value)}
+                                    required
+                                    minLength="6"
+                                />
+                                <button type="submit">
+                                    {authMode === 'signup' ? 'Create Account' : 'Log In'}
+                                </button>
+                            </form>
+
+                            <div className="auth-toggle">
+                                {authMode === 'signup' ? (
+                                    <>Already have an account? <a onClick={() => setAuthMode('login')}>Log in</a></>
+                                ) : (
+                                    <>Don't have an account? <a onClick={() => setAuthMode('signup')}>Sign up</a></>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="app-container">
                     <style>{`
                         body {
                             background: ${currentTheme.gradient};
+                            color: ${currentTheme.text};
                             ${currentTheme.pattern ? 'background-blend-mode: overlay;' : ''}
+                        }
+                        .stat-card, .insight-value, .insight-label, .insight-message,
+                        .section, .task-card, .modal-content, h2, h3, p, span, div {
+                            color: ${currentTheme.text};
                         }
                         .btn-primary {
                             background: ${currentTheme.primary};
+                            color: white;
                         }
                         .btn-primary:hover {
                             background: ${currentTheme.accent};
@@ -2031,7 +2433,7 @@
                         }
                     `}</style>
                     <div className="header">
-                        <h1>🎯 FocusFlow</h1>
+                        <h1>FocusFlow</h1>
                     </div>
 
                     <div className="main-content">
@@ -2468,6 +2870,25 @@
                                     </div>
                                 </div>
 
+                                <button
+                                    onClick={handleSaveProfile}
+                                    style={{
+                                        marginTop: '20px',
+                                        padding: '12px 24px',
+                                        background: profileSaved ? '#10b981' : '#667eea',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        fontSize: '16px',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    {profileSaved ? '✅ Profile Saved!' : '💾 Save Profile'}
+                                </button>
+
                                 <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>Statistics</h3>
                                 <div style={{ textAlign: 'left', background: '#f7fafc', padding: '20px', borderRadius: '12px' }}>
                                     <p><strong>Total Completed:</strong> {profile.totalCompleted} tasks</p>
@@ -2475,6 +2896,34 @@
                                     <p><strong>Active Goals:</strong> {activeGoals}</p>
                                     <p><strong>Best Streak:</strong> {profile.bestStreak} days</p>
                                     <p><strong>Total Items:</strong> {totalTasks}</p>
+                                </div>
+
+                                <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>☁️ Cloud Sync</h3>
+                                <div style={{ background: '#f7fafc', padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
+                                    {user && (
+                                        <div>
+                                            <p style={{ marginBottom: '10px' }}>
+                                                <strong>Status:</strong> {syncing ? '🔄 Syncing...' : '✅ Synced to cloud'}
+                                            </p>
+                                            <p style={{ marginBottom: '15px', color: '#666', fontSize: '14px' }}>
+                                                Logged in as: {user.email}
+                                            </p>
+                                            <button
+                                                onClick={handleLogout}
+                                                style={{
+                                                    padding: '10px 20px',
+                                                    background: '#ef4444',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            >
+                                                Logout
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <h3 style={{ marginTop: '30px', marginBottom: '15px' }}>
