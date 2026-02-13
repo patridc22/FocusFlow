@@ -352,7 +352,7 @@
             box-shadow: 0 -2px 20px rgba(0,0,0,0.06);
             border-top: 0.5px solid rgba(0,0,0,0.08);
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             padding: 8px 0 max(16px, env(safe-area-inset-bottom)) 0;
             z-index: 1000;
         }
@@ -1722,8 +1722,10 @@
 
             // Breathing exercise state
             const [breathingActive, setBreathingActive] = useState(false);
-            const [breathingPhase, setBreathingPhase] = useState('inhale'); // 'inhale', 'hold', 'exhale'
+            const [breathingPattern, setBreathingPattern] = useState('478'); // '478', 'box', 'deep'
+            const [breathingPhase, setBreathingPhase] = useState('inhale'); // 'inhale', 'hold', 'exhale', 'hold2'
             const [breathingCycle, setBreathingCycle] = useState(0);
+            const [breathingSeconds, setBreathingSeconds] = useState(0);
 
             // Check auth and load data
             useEffect(() => {
@@ -2290,41 +2292,76 @@
                 return `${mins}:${secs.toString().padStart(2, '0')}`;
             };
 
-            // Breathing exercise functions (4-7-8 technique)
+            // Breathing patterns
+            const breathingPatterns = {
+                '478': {
+                    name: '4-7-8 Breathing',
+                    desc: 'Inhale 4s, Hold 7s, Exhale 8s',
+                    phases: [
+                        { name: 'Inhale', duration: 4, size: 180 },
+                        { name: 'Hold', duration: 7, size: 180 },
+                        { name: 'Exhale', duration: 8, size: 100 }
+                    ]
+                },
+                'box': {
+                    name: 'Box Breathing',
+                    desc: 'Inhale 4s, Hold 4s, Exhale 4s, Hold 4s',
+                    phases: [
+                        { name: 'Inhale', duration: 4, size: 180 },
+                        { name: 'Hold', duration: 4, size: 180 },
+                        { name: 'Exhale', duration: 4, size: 100 },
+                        { name: 'Hold', duration: 4, size: 100 }
+                    ]
+                },
+                'deep': {
+                    name: 'Deep Breathing',
+                    desc: 'Slow inhale 6s, Slow exhale 6s',
+                    phases: [
+                        { name: 'Inhale Slowly', duration: 6, size: 180 },
+                        { name: 'Exhale Slowly', duration: 6, size: 100 }
+                    ]
+                }
+            };
+
             const startBreathing = () => {
                 setBreathingActive(true);
-                setBreathingPhase('inhale');
+                setBreathingPhase(0);
                 setBreathingCycle(0);
+                setBreathingSeconds(breathingPatterns[breathingPattern].phases[0].duration);
             };
 
             const stopBreathing = () => {
                 setBreathingActive(false);
-                setBreathingPhase('inhale');
+                setBreathingPhase(0);
                 setBreathingCycle(0);
+                setBreathingSeconds(0);
             };
 
-            // Breathing cycle effect (4-7-8: inhale 4s, hold 7s, exhale 8s)
+            // Countdown timer for breathing
             useEffect(() => {
-                if (!breathingActive) return;
+                if (!breathingActive || breathingSeconds === 0) return;
 
-                const cycleBreathing = () => {
+                const timer = setTimeout(() => {
+                    setBreathingSeconds(prev => prev - 1);
+                }, 1000);
+
+                return () => clearTimeout(timer);
+            }, [breathingActive, breathingSeconds]);
+
+            // Phase transition
+            useEffect(() => {
+                if (!breathingActive || breathingSeconds > 0) return;
+
+                const pattern = breathingPatterns[breathingPattern];
+                const nextPhase = (breathingPhase + 1) % pattern.phases.length;
+
+                if (nextPhase === 0) {
                     setBreathingCycle(prev => prev + 1);
-                };
-
-                let timeout;
-                if (breathingPhase === 'inhale') {
-                    timeout = setTimeout(() => setBreathingPhase('hold'), 4000);
-                } else if (breathingPhase === 'hold') {
-                    timeout = setTimeout(() => setBreathingPhase('exhale'), 7000);
-                } else if (breathingPhase === 'exhale') {
-                    timeout = setTimeout(() => {
-                        setBreathingPhase('inhale');
-                        cycleBreathing();
-                    }, 8000);
                 }
 
-                return () => clearTimeout(timeout);
-            }, [breathingActive, breathingPhase]);
+                setBreathingPhase(nextPhase);
+                setBreathingSeconds(pattern.phases[nextPhase].duration);
+            }, [breathingActive, breathingSeconds, breathingPhase, breathingPattern]);
 
             const toggleSection = (section) => {
                 setCollapsedSections({
@@ -2886,6 +2923,7 @@
                         {activeTab === 'goals' && <h1>My Goals</h1>}
                         {activeTab === 'profile' && <h1>My Profile</h1>}
                         {activeTab === 'focus' && <h1>Focus</h1>}
+                        {activeTab === 'breathe' && <h1>Breathe</h1>}
                     </div>
 
                     <div className="main-content">
@@ -3350,12 +3388,12 @@
                                             padding: '15px 40px',
                                             fontSize: '1.2em',
                                             fontWeight: 'bold',
-                                            background: '#ef4444',
+                                            background: '#94a3b8',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '50px',
                                             cursor: 'pointer',
-                                            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)'
+                                            boxShadow: '0 4px 15px rgba(148, 163, 184, 0.3)'
                                         }}
                                     >
                                         Reset
@@ -3411,82 +3449,6 @@
                                     </div>
                                 </div>
 
-                                {/* Breathing Exercise */}
-                                <div style={{ marginTop: '50px', marginBottom: '30px' }}>
-                                    <h3 style={{ marginBottom: '20px', color: '#667eea', fontSize: '1.5em' }}>Mindful Breathing</h3>
-                                    <p style={{ color: '#666', marginBottom: '20px', fontSize: '0.95em' }}>
-                                        4-7-8 breathing technique: Inhale for 4s, Hold for 7s, Exhale for 8s
-                                    </p>
-
-                                    {/* Breathing Circle */}
-                                    <div style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        marginBottom: '30px'
-                                    }}>
-                                        <div style={{
-                                            position: 'relative',
-                                            width: '200px',
-                                            height: '200px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginBottom: '20px'
-                                        }}>
-                                            <div style={{
-                                                width: breathingActive
-                                                    ? (breathingPhase === 'inhale' ? '180px' : breathingPhase === 'hold' ? '180px' : '100px')
-                                                    : '140px',
-                                                height: breathingActive
-                                                    ? (breathingPhase === 'inhale' ? '180px' : breathingPhase === 'hold' ? '180px' : '100px')
-                                                    : '140px',
-                                                borderRadius: '50%',
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                transition: breathingActive
-                                                    ? (breathingPhase === 'inhale' ? 'all 4s ease-in-out' : breathingPhase === 'hold' ? 'all 0s' : 'all 8s ease-in-out')
-                                                    : 'all 1s ease',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: 'white',
-                                                fontSize: '1.2em',
-                                                fontWeight: '600',
-                                                boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)'
-                                            }}>
-                                                {breathingActive ? (
-                                                    breathingPhase === 'inhale' ? 'Inhale' :
-                                                    breathingPhase === 'hold' ? 'Hold' :
-                                                    'Exhale'
-                                                ) : 'Ready'}
-                                            </div>
-                                        </div>
-
-                                        {breathingActive && (
-                                            <p style={{ color: '#667eea', fontWeight: '600', marginBottom: '15px' }}>
-                                                Cycle {breathingCycle + 1}
-                                            </p>
-                                        )}
-
-                                        <button
-                                            onClick={breathingActive ? stopBreathing : startBreathing}
-                                            style={{
-                                                padding: '12px 30px',
-                                                fontSize: '1.1em',
-                                                fontWeight: 'bold',
-                                                background: breathingActive ? '#ef4444' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '50px',
-                                                cursor: 'pointer',
-                                                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
-                                            }}
-                                        >
-                                            {breathingActive ? 'Stop' : 'Start Breathing'}
-                                        </button>
-                                    </div>
-                                </div>
-
                                 {/* Tips */}
                                 <div style={{
                                     background: '#f7fafc',
@@ -3501,6 +3463,149 @@
                                         <li>Take 5-minute breaks between sessions</li>
                                         <li>Turn off notifications and close distractions</li>
                                         <li>Track your focused time to build better habits</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Breathe Tab */}
+                    {activeTab === 'breathe' && (
+                        <div className="section" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+
+                                {/* Pattern Selector */}
+                                <div style={{ marginBottom: '40px' }}>
+                                    <p style={{ color: '#666', marginBottom: '20px', fontWeight: '600' }}>Choose Your Breathing Pattern:</p>
+                                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                        {Object.keys(breathingPatterns).map(key => (
+                                            <button
+                                                key={key}
+                                                onClick={() => {
+                                                    stopBreathing();
+                                                    setBreathingPattern(key);
+                                                }}
+                                                style={{
+                                                    padding: '15px 25px',
+                                                    background: breathingPattern === key
+                                                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                                        : '#f1f5f9',
+                                                    color: breathingPattern === key ? 'white' : '#64748b',
+                                                    border: 'none',
+                                                    borderRadius: '15px',
+                                                    cursor: 'pointer',
+                                                    fontWeight: '600',
+                                                    transition: 'all 0.3s ease',
+                                                    boxShadow: breathingPattern === key
+                                                        ? '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                                        : '0 2px 8px rgba(0,0,0,0.1)'
+                                                }}
+                                            >
+                                                <div style={{ fontSize: '0.95em', marginBottom: '4px' }}>
+                                                    {breathingPatterns[key].name}
+                                                </div>
+                                                <div style={{ fontSize: '0.75em', opacity: 0.8 }}>
+                                                    {breathingPatterns[key].desc}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Breathing Circle */}
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    marginBottom: '40px'
+                                }}>
+                                    <div style={{
+                                        position: 'relative',
+                                        width: '240px',
+                                        height: '240px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        marginBottom: '30px'
+                                    }}>
+                                        <div style={{
+                                            width: breathingActive
+                                                ? `${breathingPatterns[breathingPattern].phases[breathingPhase].size}px`
+                                                : '140px',
+                                            height: breathingActive
+                                                ? `${breathingPatterns[breathingPattern].phases[breathingPhase].size}px`
+                                                : '140px',
+                                            borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            transition: breathingActive
+                                                ? `all ${breathingPatterns[breathingPattern].phases[breathingPhase].duration}s ease-in-out`
+                                                : 'all 1s ease',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white',
+                                            fontWeight: '600',
+                                            boxShadow: '0 10px 40px rgba(102, 126, 234, 0.4)'
+                                        }}>
+                                            <div style={{ fontSize: '1.3em', marginBottom: '8px' }}>
+                                                {breathingActive
+                                                    ? breathingPatterns[breathingPattern].phases[breathingPhase].name
+                                                    : 'Ready'}
+                                            </div>
+                                            {breathingActive && (
+                                                <div style={{ fontSize: '2.5em', fontWeight: '800' }}>
+                                                    {breathingSeconds}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {breathingActive && (
+                                        <p style={{ color: '#667eea', fontWeight: '600', marginBottom: '20px', fontSize: '1.1em' }}>
+                                            Cycle {breathingCycle + 1}
+                                        </p>
+                                    )}
+
+                                    <button
+                                        onClick={breathingActive ? stopBreathing : startBreathing}
+                                        style={{
+                                            padding: '15px 40px',
+                                            fontSize: '1.2em',
+                                            fontWeight: 'bold',
+                                            background: breathingActive
+                                                ? 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)'
+                                                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '50px',
+                                            cursor: 'pointer',
+                                            boxShadow: breathingActive
+                                                ? '0 4px 15px rgba(148, 163, 184, 0.3)'
+                                                : '0 4px 15px rgba(102, 126, 234, 0.4)',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                    >
+                                        {breathingActive ? 'Stop' : 'Start'}
+                                    </button>
+                                </div>
+
+                                {/* Breathing Tips */}
+                                <div style={{
+                                    background: '#f7fafc',
+                                    padding: '25px',
+                                    borderRadius: '15px',
+                                    textAlign: 'left',
+                                    color: '#666',
+                                    marginTop: '40px'
+                                }}>
+                                    <p style={{ fontWeight: '600', marginBottom: '15px', color: '#333', fontSize: '1.1em' }}>Benefits of Mindful Breathing:</p>
+                                    <ul style={{ paddingLeft: '20px', lineHeight: '1.9' }}>
+                                        <li>Reduces stress and anxiety</li>
+                                        <li>Improves focus and concentration</li>
+                                        <li>Lowers heart rate and blood pressure</li>
+                                        <li>Promotes better sleep quality</li>
+                                        <li>Enhances emotional regulation</li>
                                     </ul>
                                 </div>
                             </div>
@@ -3544,6 +3649,13 @@
                         >
                             <div className="nav-item-icon">⏱️</div>
                             <span>Focus</span>
+                        </button>
+                        <button
+                            className={`nav-item ${activeTab === 'breathe' ? 'active' : ''}`}
+                            onClick={() => switchTab('breathe')}
+                        >
+                            <div className="nav-item-icon">🫁</div>
+                            <span>Breathe</span>
                         </button>
                     </div>
 
