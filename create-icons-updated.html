@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate FocusFlow Icons</title>
+</head>
+<body>
+    <h1>Generating FocusFlow Icons...</h1>
+    <canvas id="canvas192" width="192" height="192" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    <canvas id="favicon" width="32" height="32" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+
+    <div id="download-links" style="margin: 20px;"></div>
+
+    <script>
+        // Create 192x192 icon
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+
+        // Gradient background
+        const gradient192 = ctx192.createLinearGradient(0, 0, 192, 192);
+        gradient192.addColorStop(0, '#667eea');
+        gradient192.addColorStop(1, '#764ba2');
+        ctx192.fillStyle = gradient192;
+        ctx192.fillRect(0, 0, 192, 192);
+
+        // Draw target emoji 🎯
+        ctx192.font = 'bold 120px Arial';
+        ctx192.textAlign = 'center';
+        ctx192.textBaseline = 'middle';
+        ctx192.fillText('🎯', 96, 96);
+
+        // Create 512x512 icon
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+
+        const gradient512 = ctx512.createLinearGradient(0, 0, 512, 512);
+        gradient512.addColorStop(0, '#667eea');
+        gradient512.addColorStop(1, '#764ba2');
+        ctx512.fillStyle = gradient512;
+        ctx512.fillRect(0, 0, 512, 512);
+
+        ctx512.font = 'bold 320px Arial';
+        ctx512.textAlign = 'center';
+        ctx512.textBaseline = 'middle';
+        ctx512.fillText('🎯', 256, 256);
+
+        // Create favicon (32x32)
+        const canvasFav = document.getElementById('favicon');
+        const ctxFav = canvasFav.getContext('2d');
+
+        const gradientFav = ctxFav.createLinearGradient(0, 0, 32, 32);
+        gradientFav.addColorStop(0, '#667eea');
+        gradientFav.addColorStop(1, '#764ba2');
+        ctxFav.fillStyle = gradientFav;
+        ctxFav.fillRect(0, 0, 32, 32);
+
+        ctxFav.font = 'bold 24px Arial';
+        ctxFav.textAlign = 'center';
+        ctxFav.textBaseline = 'middle';
+        ctxFav.fillText('🎯', 16, 16);
+
+        // Create download links
+        const downloadLinks = document.getElementById('download-links');
+
+        setTimeout(() => {
+            // 192x192
+            const link192 = document.createElement('a');
+            link192.download = 'icon-192.png';
+            link192.href = canvas192.toDataURL();
+            link192.textContent = 'Download icon-192.png';
+            link192.style.display = 'block';
+            link192.style.margin = '10px 0';
+            downloadLinks.appendChild(link192);
+
+            // 512x512
+            const link512 = document.createElement('a');
+            link512.download = 'icon-512.png';
+            link512.href = canvas512.toDataURL();
+            link512.textContent = 'Download icon-512.png';
+            link512.style.display = 'block';
+            link512.style.margin = '10px 0';
+            downloadLinks.appendChild(link512);
+
+            // Favicon
+            const linkFav = document.createElement('a');
+            linkFav.download = 'favicon.ico';
+            linkFav.href = canvasFav.toDataURL();
+            linkFav.textContent = 'Download favicon.png (rename to favicon.ico)';
+            linkFav.style.display = 'block';
+            linkFav.style.margin = '10px 0';
+            downloadLinks.appendChild(linkFav);
+
+            // Auto-download all
+            link192.click();
+            setTimeout(() => link512.click(), 500);
+            setTimeout(() => linkFav.click(), 1000);
+
+            downloadLinks.innerHTML += '<p style="color: green; margin-top: 20px;"><strong>✅ All icons generated and downloaded!</strong></p>';
+        }, 100);
+    </script>
+</body>
+</html>

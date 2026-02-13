@@ -4,7 +4,7 @@
   "description": "Your personal organization station - task and goal manager with AI insights and beautiful themes",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#667eea",
+  "background_color": "#ffffff",
   "theme_color": "#667eea",
   "orientation": "portrait",
   "icons": [
