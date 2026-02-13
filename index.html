@@ -1552,7 +1552,11 @@
 
             // Auth and sync state
             const [user, setUser] = useState(null);
-            const [loading, setLoading] = useState(true);
+            const [loading, setLoading] = useState(() => {
+                // Only show loading screen on first visit
+                const hasVisited = localStorage.getItem('focusflow_visited');
+                return !hasVisited;
+            });
             const [syncing, setSyncing] = useState(false);
             const [showAuth, setShowAuth] = useState(false);
             const [authMode, setAuthMode] = useState('signup'); // 'signup' or 'login'
@@ -1594,6 +1598,7 @@
                 } catch (error) {
                     console.error('Auth error:', error);
                 } finally {
+                    localStorage.setItem('focusflow_visited', 'true');
                     setLoading(false);
                 }
             };
