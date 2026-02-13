@@ -2690,7 +2690,7 @@
                         {activeTab === 'tasks' && <h1>Hey {profile.username}</h1>}
                         {activeTab === 'goals' && <h1>Your Goals</h1>}
                         {activeTab === 'profile' && <h1>{profile.username}</h1>}
-                        {activeTab === 'calendar' && <h1>Calendar</h1>}
+                        {activeTab === 'focus' && <h1>Focus Timer</h1>}
                     </div>
 
                     <div className="main-content">
@@ -2943,116 +2943,6 @@
                 )}
 
                     {/* Calendar Content */}
-                    {activeTab === 'calendar' && (
-                        <div className="section">
-                            <div style={{ padding: '20px' }}>
-                                <h2 style={{ marginBottom: '20px', color: '#667eea' }}>📅 Calendar Integration</h2>
-
-                                <div style={{ marginBottom: '20px' }}>
-                                    <p style={{ color: '#666', marginBottom: '15px' }}>
-                                        Connect your calendar to sync tasks with reminders automatically!
-                                    </p>
-
-                                    <div style={{ marginBottom: '15px' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={calendarSettings.autoSync}
-                                                onChange={(e) => setCalendarSettings({
-                                                    ...calendarSettings,
-                                                    autoSync: e.target.checked
-                                                })}
-                                            />
-                                            <span>Auto-sync tasks with reminders</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {/* Google Calendar */}
-                                <div
-                                    className={`calendar-provider ${calendarSettings.googleConnected ? 'connected' : ''}`}
-                                >
-                                    <div className="calendar-provider-header">
-                                        <div className="calendar-provider-title">
-                                            <span style={{ fontSize: '2em' }}>📧</span>
-                                            <span>Google Calendar</span>
-                                        </div>
-                                        {calendarSettings.googleConnected && (
-                                            <span className="sync-status connected">● Connected</span>
-                                        )}
-                                    </div>
-                                    {calendarSettings.googleConnected ? (
-                                        <div>
-                                            <p style={{ color: '#666', marginBottom: '10px' }}>
-                                                Connected as: <strong>{calendarSettings.googleEmail}</strong>
-                                            </p>
-                                            <button
-                                                className="btn btn-secondary"
-                                                onClick={disconnectGoogleCalendar}
-                                                style={{ marginRight: '10px' }}
-                                            >
-                                                Disconnect
-                                            </button>
-                                            <button
-                                                className="btn btn-primary"
-                                                onClick={syncAllTasks}
-                                            >
-                                                Sync Now
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <p style={{ color: '#666', marginBottom: '10px', fontSize: '0.9em' }}>
-                                                Sync your tasks to Google Calendar events with automatic reminders.
-                                            </p>
-                                            <button
-                                                className="btn btn-primary"
-                                                onClick={connectGoogleCalendar}
-                                            >
-                                                Connect Google Calendar
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Apple Calendar */}
-                                <div className="calendar-provider">
-                                    <div className="calendar-provider-header">
-                                        <div className="calendar-provider-title">
-                                            <span style={{ fontSize: '2em' }}>🍎</span>
-                                            <span>Apple Calendar / iCal</span>
-                                        </div>
-                                    </div>
-                                    <p style={{ color: '#666', marginBottom: '10px', fontSize: '0.9em' }}>
-                                        Export tasks as .ics file to import into Apple Calendar, Outlook, or any calendar app.
-                                    </p>
-                                    <button
-                                        className="btn btn-calendar"
-                                        onClick={exportToAppleCalendar}
-                                    >
-                                        📥 Export to Calendar (.ics)
-                                    </button>
-                                </div>
-
-                                <div style={{
-                                    marginTop: '20px',
-                                    padding: '15px',
-                                    background: '#f7fafc',
-                                    borderRadius: '10px',
-                                    fontSize: '0.9em'
-                                }}>
-                                    <strong>💡 How it works:</strong>
-                                    <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
-                                        <li>Tasks with reminders enabled will sync to your calendar</li>
-                                        <li>Set due date & time for accurate calendar events</li>
-                                        <li>Google Calendar syncs automatically (when connected)</li>
-                                        <li>Apple Calendar requires manual export/import</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Profile Content */}
                     {activeTab === 'profile' && (
                         <div className="section">
@@ -3376,27 +3266,6 @@
                         >
                             <div className="nav-item-icon">{profile.avatar}</div>
                             <span>Profile</span>
-                        </button>
-                        <button
-                            className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
-                            onClick={() => switchTab('calendar')}
-                        >
-                            <div style={{ position: 'relative' }}>
-                                <div className="nav-item-icon">📅</div>
-                                {(calendarSettings.googleConnected || calendarSettings.appleCalendarEnabled) &&
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '0',
-                                        right: '-5px',
-                                        width: '10px',
-                                        height: '10px',
-                                        background: '#48bb78',
-                                        borderRadius: '50%',
-                                        border: '2px solid white'
-                                    }}></div>
-                                }
-                            </div>
-                            <span>Calendar</span>
                         </button>
                         <button
                             className={`nav-item ${activeTab === 'focus' ? 'active' : ''}`}
