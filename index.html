@@ -1928,9 +1928,19 @@
                     const { data, error } = await supabase.auth.signUp({
                         email: authEmail,
                         password: authPassword,
+                        options: {
+                            emailRedirectTo: window.location.origin
+                        }
                     });
 
-                    if (error) throw error;
+                    if (error) {
+                        if (error.message.includes('rate limit')) {
+                            setAuthError('⏰ Too many signup attempts. Please wait 1 hour, or try logging in if you already have an account.');
+                        } else {
+                            setAuthError(error.message);
+                        }
+                        return;
+                    }
 
                     if (data.user) {
                         setUser(data.user);
@@ -1945,7 +1955,7 @@
                         }
                         await syncCalendarToSupabase();
 
-                        alert('Account created! Your data is now synced to the cloud.');
+                        alert('✅ Account created! Your data is now synced to the cloud.');
                     }
                 } catch (error) {
                     setAuthError(error.message);
@@ -1962,7 +1972,16 @@
                         password: authPassword,
                     });
 
-                    if (error) throw error;
+                    if (error) {
+                        if (error.message.includes('Invalid login')) {
+                            setAuthError('❌ Invalid email or password. Try signing up if you don\'t have an account.');
+                        } else if (error.message.includes('rate limit')) {
+                            setAuthError('⏰ Too many login attempts. Please wait a few minutes and try again.');
+                        } else {
+                            setAuthError(error.message);
+                        }
+                        return;
+                    }
 
                     if (data.user) {
                         setUser(data.user);
